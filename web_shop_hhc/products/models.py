@@ -22,10 +22,11 @@ class Product(models.Model):
     price = models.FloatField()
     is_sale = models.BooleanField(default=False)
     discount = models.IntegerField(blank=True, null=True)
-    image = models.ImageField(blank=True, null=True)
-    available_quantity = models.IntegerField(default=0, max_length=6)
+    image = models.ImageField(upload_to='files/products_images')
+    available_quantity = models.IntegerField(default=0)
+    # Add Type field!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     def __str__(self):
         return self.title
 
-# ADD USERS, COMMENTS, purchase history, product rating
+# ADD USERS, COMMENTS, purchase history, product rating!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
