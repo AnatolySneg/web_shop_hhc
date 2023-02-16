@@ -23,7 +23,8 @@ class Product(models.Model):
     price = models.FloatField()
     is_sale = models.BooleanField(default=False)
     discount = models.IntegerField(blank=True, null=True)
-    image = models.ImageField(upload_to='files/products_images')
+    image = models.ImageField(upload_to='upload/')
+    # https://www.youtube.com/watch?v=fsVY66QBhwM for finishing.
     available_quantity = models.IntegerField(default=0)
     type = models.ForeignKey(Type, default=None, on_delete=models.CASCADE)
     # Add Type field!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
