@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .models import Product
+from .models import Product, Image
 # Create your views here.
 
 
@@ -10,8 +10,8 @@ def home_page(request):
 
 
 def product_list(request):
-    products_all = Product.objects.all()
+    products = Product.objects.all()
     return render(request, 'products/home_page.html', {
-        'product_list': products_all,
+        'products': products,
     }
                   )

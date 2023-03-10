@@ -23,14 +23,20 @@ class Product(models.Model):
     price = models.FloatField()
     is_sale = models.BooleanField(default=False)
     discount = models.IntegerField(blank=True, null=True)
-    image = models.ImageField(upload_to='upload/')
-    # https://www.youtube.com/watch?v=fsVY66QBhwM for finishing.
     available_quantity = models.IntegerField(default=0)
     type = models.ForeignKey(Type, default=None, on_delete=models.CASCADE)
-    # Add Type field!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # Add Type, field!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     def __str__(self):
         return self.title
+
+    def get_images(self):
+        return Image.objects.filter(product=self)
+
+
+class Image(models.Model):
+    image = models.ImageField(upload_to='upload/')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
 
 class Comments (models.Model):
@@ -39,6 +45,6 @@ class Comments (models.Model):
     author = models.CharField(default='DefaultAUTHOR', max_length=100)
     published_date = models.DateTimeField(auto_now_add=True)
     # Change to Author from users model, when created!!!!!!!!
-    comment = models.TextField(blank=True, max_length=1000) # Comments should be approved by moderator !!!!
+    comment = models.TextField(blank=True, max_length=1000)  # Comments should be approved by moderator !!!!
 
 # ADD USERS, COMMENTS, purchase history, product rating!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
