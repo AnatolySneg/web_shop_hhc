@@ -67,11 +67,17 @@
         <div class="product_list">
             <div class="name_mini">
                <h3>{{ product.title }}</h3>
+               <h5>{{ product.id }}</h5>
             </div>
-            <div class="image">
-               <p>{{ product.get_images }}</p>
-                <img src={{product.get_images}} width="150">
-            </div>
+
+           {% for img in product.get_images %}
+                {% if img.title_image %}
+                    <div class="image">
+                        <p>{{ img.image }}</p>
+                        <img src={{img.image.url}} width="150">
+                    </div>
+                {% endif %}
+            {% endfor %}
         </div>
     {% endfor %}
 
