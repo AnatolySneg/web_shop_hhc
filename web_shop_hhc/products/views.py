@@ -8,6 +8,7 @@ from .models import Product
 
 def product_list(request):
     products = Product.objects.all()
+    print(request)
     return render(request, 'products/home_page.html', {
         'products': products,
     }
@@ -16,12 +17,21 @@ def product_list(request):
 
 def contacts_page(request):
     print('contacts_page from console')
-    return HttpResponse('This is Contacts_page')
+    print(request)
+    test_string = "This string was rendered from views.contacts_page()"
+    return render(request, 'products/about_us.html', {
+        "test_string": test_string,
+    }
+                  )
 
 
 def login_page(request):
     print('login_page from console')
-    return HttpResponse('This is login_page')
+    test_string = "This string was rendered from views.login_page()"
+    return render(request, 'products/login_page.html', {
+        "test_string": test_string,
+    }
+                  )
 
 
 def logout(request):
@@ -31,9 +41,19 @@ def logout(request):
 
 def user_page(request):
     print('user_page from console')
-    return HttpResponse('This is user_page')
+    print(request)
+    test_string = "USER PAGE"
+    return render(request, 'products/login_page.html', {
+        "test_string": test_string,
+    }
+                  )
 
 
 def bucket(request):
     print('Bucket_page from console')
-    return HttpResponse('This is Bucket_page')
+    print(request)
+    test_string = "This string was rendered from views.bucket()"
+    return render(request, 'products/login_page.html', {
+        "test_string": test_string,
+    }
+                  )
