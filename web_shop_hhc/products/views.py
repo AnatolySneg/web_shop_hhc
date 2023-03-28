@@ -43,7 +43,7 @@ def user_page(request):
     print('user_page from console')
     print(request)
     test_string = "USER PAGE"
-    return render(request, 'products/login_page.html', {
+    return render(request, 'products/user_page.html', {
         "test_string": test_string,
     }
                   )
@@ -53,7 +53,7 @@ def bucket(request):
     print('Bucket_page from console')
     print(request)
     test_string = "This string was rendered from views.bucket()"
-    return render(request, 'products/login_page.html', {
+    return render(request, 'products/bucket_page_gest.html', {
         "test_string": test_string,
     }
                   )
