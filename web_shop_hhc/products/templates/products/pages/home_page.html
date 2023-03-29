@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
 {% extends 'products/index.html' %}
 
 {% block content %}
 <main>
-    <h3>Хлебные крошки</h3>
     <h3>Фильтры</h3>
 
 
@@ -30,13 +27,7 @@
             </div>
 
 
-            <nav aria-label="breadcrumb">
-              <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                <li class="breadcrumb-item"><a href="#">Library</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Data</li>
-              </ol>
-            </nav>
+            {% include '../includes/breadcrumb.html' %}
 
 
 
@@ -50,14 +41,13 @@
                                     {% for img in product.get_images %}
                                         {% if img.title_image %}
                                             <div class="image">
-                                                <p>{{ img.image }}</p>
                                                 <img src={{img.image.url}} width="150">
                                             </div>
                                         {% endif %}
                                     {% endfor %}
                                 </div>
                                 <div class="card-body text-center">
-                                    <a href="#" class="grey-text">
+                                    <a href="/product_detail/{{ product.pk }}" class="grey-text">
                                         <h6>{{ product.title }}</h6>
                                     </a>
                                     <a>{{ product.id }}</a>

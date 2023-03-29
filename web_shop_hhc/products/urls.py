@@ -11,6 +11,7 @@ urlpatterns = [
     path('logout/', login_page),
     path('user/', user_page),
     path('bucket/', bucket),
+    path('product_detail/<int:product_pk>/', product_detail),
 ]
 
 if settings.DEBUG:
