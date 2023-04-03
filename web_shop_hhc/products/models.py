@@ -1,5 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth.models import User
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 class Category(models.Model):
@@ -25,8 +27,6 @@ class Product(models.Model):
     discount = models.IntegerField(blank=True, null=True)
     available_quantity = models.IntegerField(default=0)
     type = models.ForeignKey(Type, default=None, on_delete=models.CASCADE)
-
-    # Add Type, field!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     def __str__(self):
         return f'{self.title} | product id - {self.id}'
@@ -77,7 +77,17 @@ class Comments(models.Model):
     rate = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], blank=True)
     author = models.CharField(default='DefaultAUTHOR', max_length=100)
     published_date = models.DateTimeField(auto_now_add=True)
-    # Change to Author from users model, when created!!!!!!!!
+    # TODO: Change to Author from users model, when created!!!!!!!!
     comment = models.TextField(blank=True, max_length=1000)  # Comments should be approved by moderator !!!!
 
-# ADD USERS, COMMENTS, purchase history, product rating!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+# TODO: ADD USERS, COMMENTS, purchase history, product rating!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+class Customers(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=40)
+    lust_name = models.CharField(max_length=40)
+    phone_number = PhoneNumberField(region="UA")
+    e_mail = models.EmailField(unique=True, max_length=254)
+    birth_date = models.DateField(null=True, blank=True)

@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.admin import User
 from .models import *
 
 
@@ -12,6 +14,17 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ['title', 'id']
 
 
+class CustomersInline(admin.StackedInline):
+    model = Customers
+
+
+class UserAdmin(BaseUserAdmin):
+    inlines = (CustomersInline, )
+    list_display = ['user', 'first_name', 'lust_name', 'phone_number', 'e_mail', ]
+
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Category)
 admin.site.register(Type)
