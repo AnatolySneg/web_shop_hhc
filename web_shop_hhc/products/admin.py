@@ -11,19 +11,21 @@ class ImageInline(admin.StackedInline):
 
 class ProductAdmin(admin.ModelAdmin):
     inlines = [ImageInline]
-    list_display = ['title', 'id']
+    list_display = ['id', 'title', 'available_quantity', 'price', 'is_sale', 'discount', ]
 
 
-class CustomersInline(admin.StackedInline):
-    model = Customers
+class CustomerInline(admin.StackedInline):
+    model = Customer
 
 
 class UserAdmin(BaseUserAdmin):
-    inlines = (CustomersInline, )
-    list_display = ['user', 'first_name', 'lust_name', 'phone_number', 'e_mail', ]
+    inlines = (CustomerInline, )
+
+    # pass
 
 
 admin.site.unregister(User)
+# admin.site.register(User)
 admin.site.register(User, UserAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Category)
