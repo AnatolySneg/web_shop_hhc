@@ -8,6 +8,7 @@ urlpatterns = [
     path('', product_list),
     path('about_us/', contacts_page),
     path('login/', login_page),
+    path('signup/', signup),
     path('logout/', login_page),
     path('user/', user_page),
     path('bucket/', bucket),

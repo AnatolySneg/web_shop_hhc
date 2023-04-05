@@ -1,6 +1,7 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from .models import Product, Image
+from .forms import SignupForm
 
 
 # Create your views here.
@@ -8,7 +9,7 @@ from .models import Product, Image
 
 def product_list(request):
     products = Product.objects.all()
-    print(request)
+    print(request.user)
     return render(request, 'products/pages/home_page.html', {
         'products': products,
         'active_page': "home_page"
@@ -73,3 +74,16 @@ def bucket(request):
         'active_page': "bucket"
     }
                   )
+
+
+def signup(request):
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            return redirect('products.views.product_list')
+    else:
+        form = SignupForm()
+    return render(request, 'products/pages/signup_page.html', {'form': form})
