@@ -24,9 +24,9 @@ class UserAdmin(BaseUserAdmin):
     # pass
 
 
-admin.site.unregister(User)
+# admin.site.unregister(User)
 # admin.site.register(User)
-admin.site.register(User, UserAdmin)
+# admin.site.register(User, UserAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Category)
 admin.site.register(Type)

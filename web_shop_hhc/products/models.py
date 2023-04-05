@@ -84,7 +84,6 @@ class Comments(models.Model):
 # TODO: ADD USERS, COMMENTS, purchase history, product rating!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-class Customer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+class Customer(User):
     phone_number = PhoneNumberField(region="UA")
     birth_date = models.DateField(null=True, blank=True)
