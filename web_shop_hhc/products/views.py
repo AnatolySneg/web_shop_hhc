@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from .models import Product, Image
-from .forms import SignupForm
+from .forms import *
 
 
 # Create your views here.
@@ -78,12 +78,19 @@ def bucket(request):
 
 def signup(request):
     if request.method == 'POST':
-        form = SignupForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])
-            user.save()
-            return redirect('products.views.product_list')
+        user_form = UserSignupForm(request.POST)
+        customer_form = CustomerSignupForm(request.POST)
+        if user_form.is_valid() and customer_form.is_valid():
+            user = user_form.save()
+            customer = customer_form.save(commit=False)
+            # customer.user = user
+            customer.save()
+            return redirect('/')
     else:
-        form = SignupForm()
-    return render(request, 'products/pages/signup_page.html', {'form': form})
+        user_form = UserSignupForm()
+        customer_form = CustomerSignupForm()
+    return render(request, 'products/pages/signup_page.html', {
+        'user_form': user_form,
+        'customer_form': customer_form,
+    }
+                  )
