@@ -5,28 +5,21 @@
 {% block content %}
 <main>
 
-      <form class="px-4 py-3">
+    <form class="px-4 py-3" action="{% url 'login' %}" method="post">
+        {% csrf_token %}
         <div class="mb-3">
-          <label for="exampleDropdownFormEmail1" class="form-label">Email address</label>
-          <input type="email" class="form-control" id="exampleDropdownFormEmail1" placeholder="email@example.com">
+            <label for="phone" class="form-label">Enter your phone number +38:</label>
+            <input type="tel" class="form-control" id="phone" name="phone" placeholder="7771234567"  required>
         </div>
         <div class="mb-3">
-          <label for="exampleDropdownFormPassword1" class="form-label">Password</label>
-          <input type="password" class="form-control" id="exampleDropdownFormPassword1" placeholder="Password">
-        </div>
-        <div class="mb-3">
-          <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="dropdownCheck">
-            <label class="form-check-label" for="dropdownCheck">
-              Remember me
-            </label>
-          </div>
+            <label for="exampleDropdownFormPassword1" class="form-label">Password</label>
+            <input type="password"  name="password" class="form-control" id="exampleDropdownFormPassword1" placeholder="Password">
         </div>
         <button type="submit" class="btn btn-primary">Sign in</button>
-      </form>
-      <div class="dropdown-divider"></div>
+    </form>
+    <div class="dropdown-divider"></div>
     <a href="/signup/"><strong>New around here? Sign up</strong></a>
-      <a class="dropdown-item" href="#">Forgot password?</a>
+    <a class="dropdown-item" href="#">Forgot password?</a>
 
 </main>
 {% endblock %}

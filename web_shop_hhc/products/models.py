@@ -88,3 +88,5 @@ class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone_number = PhoneNumberField(region="UA")
     birth_date = models.DateField(null=True, blank=True)
+
+# TODO: make validation method save to provide registration users with same email, phone_numbers and Usernames.

@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
-from .models import Product, Image
+from django.http import HttpResponse, HttpRequest
+from .models import *
+from django.contrib.auth import authenticate, login as django_login, logout as django_logout
 from .forms import *
 
 
@@ -10,6 +11,8 @@ from .forms import *
 def product_list(request):
     products = Product.objects.all()
     print(request.user)
+    print(request.user.is_authenticated)
+    print(request.META.get('HTTP_REFERER'))
     return render(request, 'products/pages/home_page.html', {
         'products': products,
         'active_page': "home_page"
@@ -39,19 +42,44 @@ def contacts_page(request):
                   )
 
 
+# def login_page(request):
+#     print('login_page from console')
+#     if request.method=="POST":
+#         print('POST!!!  POST!!!  POST!!!  POST!!!  POST!!!  ')
+#         print(request.POST['phone'])
+#         for key in request.POST:
+#             print(key, ' - ', request.POST[key])
+#         print('POST!!!  POST!!!  POST!!!  POST!!!  POST!!!  ')
+#
+#     return render(request, 'products/pages/login_page.html', {
+#         'active_page': "login_page"
+#     }
+#                   )
+
+
 def login_page(request):
-    print('login_page from console')
-    test_string = "This string was rendered from views.login_page()"
-    return render(request, 'products/pages/login_page.html', {
-        "test_string": test_string,
-        'active_page': "login_page"
-    }
-                  )
+    ctx = {}
+    if request.method == "POST":
+        phone_number = request.POST['phone']
+        # TODO: make validator for signs of phone number
+        if len(phone_number) == 10:
+            phone_number = '+38' + phone_number
+        username = Customer.objects.get(phone_number=phone_number).user.username
+        password = request.POST['password']
+        auth_user = authenticate(username=username, password=password)
+        if auth_user:
+            django_login(request, auth_user)
+            return redirect('/')
+        else:
+            # TODO: raise error if no user or incorrect password
+            ctx['error'] = 'User not found!'
+    ctx['active_page'] = "login_page"
+    return render(request, 'products/pages/login_page.html', ctx)
 
 
 def logout(request):
-    print('logout_process from console')
-    return HttpResponse('This is logout_process')
+    django_logout(request)
+    return redirect('/')
 
 
 def user_page(request):
@@ -66,23 +94,38 @@ def user_page(request):
 
 
 def bucket(request):
-    print('Bucket_page from console')
-    print(request)
-    test_string = "This string was rendered from views.bucket()"
+    print(request.session.get('products'), type(request.session.get('products')))
+    bucket_ids = request.session.get('products')
+    print(bucket_ids, type(bucket_ids))
+    product_quantity = {}
+    try:
+        for id in bucket_ids:
+            product_quantity[id] = bucket_ids.count(id)
+            print(product_quantity)
+        list_product_quantity = list(product_quantity.keys())
+        list_product_quantity.sort()
+        sorted_product_quantity = {key: product_quantity[key] for key in list_product_quantity}
+        bucket_products = Product.objects.filter(id__in=bucket_ids)
+    except TypeError:
+        bucket_products = []
     return render(request, 'products/pages/bucket_page_gest.html', {
-        "test_string": test_string,
+        'bucket_ids': bucket_ids,
+        'bucket_products': bucket_products,
+        'product_quantity': sorted_product_quantity,
         'active_page': "bucket"
     }
                   )
 
 
 def signup(request):
+    # TODO: register only unique phones and emails
     if request.method == 'POST':
         user_form = UserSignupForm(request.POST)
         customer_form = CustomerSignupForm(request.POST)
         if user_form.is_valid() and customer_form.is_valid():
             user = user_form.save()
             customer = customer_form.save(commit=False)
+            # TODO: what is below doing???
             # customer.user = user
             customer.save()
             return redirect('/')
@@ -92,5 +135,46 @@ def signup(request):
     return render(request, 'products/pages/signup_page.html', {
         'user_form': user_form,
         'customer_form': customer_form,
+        'active_page': "signup_page"
     }
                   )
+
+
+def add_to_bucket(request, product_id):
+    if request.META.get('HTTP_REFERER'):
+        bucket_products = request.session.get('products')
+        if not bucket_products:
+            request.session['products'] = [product_id]
+        else:
+            products = request.session['products']
+            products.append(product_id)
+            request.session['products'] = products
+        return redirect(request.META.get('HTTP_REFERER'))
+    else:
+        return redirect('/')
+
+
+"""
+phone number = "+380441234567"
+password = "JS-password"
+
+if Customer.objects.filter(phone_number=str(phone_number)):
+
+find its user.username and threw it as arg (username) in authenticate(username=username,
+                                     password=password)
+    
+
+"""
+
+# def login(request):
+#     ctx = {}
+#     if request.method == 'POST':
+#         username = request.POST.get('username')
+#         password = request.POST.get('password')
+#         auth_user = authenticate(username=username, password=password)
+#         if auth_user:
+#             django_login(request, auth_user)
+#             return redirect('/')
+#         else:
+#             ctx['error'] = 'User not found!'
+#     return render(request, 'users/auth/login.html', ctx)

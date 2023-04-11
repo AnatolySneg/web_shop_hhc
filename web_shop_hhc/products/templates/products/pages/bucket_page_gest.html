@@ -4,7 +4,50 @@
 
 {% block content %}
 <main>
-    <div><h1>{{ test_string }}</h1></div>
-    <h1>{{ test_string }}</h1><h1>{{ test_string }}</h1><h1>{{ test_string }}</h1>
+    {% if not bucket_ids %}
+        <h3>Your bucket is empty</h3>
+    {% else %}
+        <div>
+            <h1>Your bucket:</h1>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">    </th>
+              <th scope="col">Title</th>
+              <th scope="col">Price</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">        </th>
+              <th scope="col">Total price</th>
+            </tr>
+          </thead>
+          <tbody class="table-group-divider">
+            {% for product in bucket_products %}
+                <tr>
+                  <th scope="row">
+                      {% for img in product.get_images %}
+                        {% if img.title_image %}
+                            <div class="image">
+                                <img src={{img.image.url}} width="80">
+                            </div>
+                        {% endif %}
+                      {% endfor %}
+                  </th>
+                  <td>{{ product.title }}</td>
+                  <td>{{ product.price }} ₴</td>
+                  <td>
+                      {% for q in product_quantity%}
+                        {{ q }}
+                      {% endfor %}
+                  </td>
+                  <td><a href="#" class="btn btn-warning">Remove from bucket</a></td>
+                  <td>Price * quantity</td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      <a href="#" class="btn btn-danger">Clear bucket</a>
+      <a href="#" class="btn btn-success">Make offer</a>
+    {% endif %}
 </main>
 {% endblock %}
