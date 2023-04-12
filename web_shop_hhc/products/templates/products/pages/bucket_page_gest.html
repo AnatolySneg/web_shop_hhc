@@ -11,7 +11,7 @@
             <h1>Your bucket:</h1>
         </div>
         <table class="table">
-          <thead>
+          <thead class="text-center mb-4">
             <tr>
               <th scope="col">    </th>
               <th scope="col">Title</th>
@@ -21,9 +21,9 @@
               <th scope="col">Total price</th>
             </tr>
           </thead>
-          <tbody class="table-group-divider">
+          <tbody class="table-group-divider" >
             {% for product in bucket_products %}
-                <tr>
+                <tr class="text-center mb-4">
                   <th scope="row">
                       {% for img in product.get_images %}
                         {% if img.title_image %}
@@ -36,11 +36,15 @@
                   <td>{{ product.title }}</td>
                   <td>{{ product.price }} ₴</td>
                   <td>
-                      {% for q in product_quantity%}
-                        {{ q }}
+                      <a href="/more_to_bucket/{{ product.pk }}"><strong><</strong></a>
+                      {% for prod, quan in product_quantity.items %}
+                        {% if prod == product.id %}
+                            {{ quan }}
+                        {% endif %}
                       {% endfor %}
+                      <a href="#"><strong>></strong></a>
                   </td>
-                  <td><a href="#" class="btn btn-warning">Remove from bucket</a></td>
+                  <td><a href="/remove_from_bucket/{{ product.pk }}" class="btn btn-warning">Remove from bucket</a></td>
                   <td>Price * quantity</td>
                 </tr>
             {% endfor %}

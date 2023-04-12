@@ -94,27 +94,22 @@ def user_page(request):
 
 
 def bucket(request):
-    print(request.session.get('products'), type(request.session.get('products')))
-    bucket_ids = request.session.get('products')
-    print(bucket_ids, type(bucket_ids))
-    product_quantity = {}
+    context = {}
     try:
+        bucket_ids = request.session.get('products')
+        product_quantity = {}
         for id in bucket_ids:
             product_quantity[id] = bucket_ids.count(id)
-            print(product_quantity)
-        list_product_quantity = list(product_quantity.keys())
-        list_product_quantity.sort()
-        sorted_product_quantity = {key: product_quantity[key] for key in list_product_quantity}
         bucket_products = Product.objects.filter(id__in=bucket_ids)
+        context['bucket_ids'] = bucket_ids
+        context['bucket_products'] = bucket_products
+        context['product_quantity'] = product_quantity
+        context['active_page'] = "bucket"
+        # TODO: Check if !!!'bucket_ids' !!! needed?
     except TypeError:
         bucket_products = []
-    return render(request, 'products/pages/bucket_page_gest.html', {
-        'bucket_ids': bucket_ids,
-        'bucket_products': bucket_products,
-        'product_quantity': sorted_product_quantity,
-        'active_page': "bucket"
-    }
-                  )
+        context['bucket_products'] = bucket_products
+    return render(request, 'products/pages/bucket_page_gest.html', context)
 
 
 def signup(request):
@@ -153,6 +148,34 @@ def add_to_bucket(request, product_id):
     else:
         return redirect('/')
 
+
+def remove_from_bucket(request, product_pk):
+    if request.META.get('HTTP_REFERER'):
+        bucket_products = request.session.get('products')
+        new_bucket_list = []
+        for bucket_id in bucket_products:
+            if bucket_id != product_pk:
+                new_bucket_list.append(bucket_id)
+        request.session['products'] = new_bucket_list
+        return redirect(bucket)
+    else:
+        return redirect('/')
+
+# TODO: JUST CREATED THIS FUNCTION, BEGIN FROM HERE!!!!
+def more_to_bucket(request, product_pk):
+    if request.META.get('HTTP_REFERER'):
+        bucket_products = request.session.get('products')
+        new_bucket_list = []
+        for bucket_id in bucket_products:
+            if bucket_id != product_pk:
+                new_bucket_list.append(bucket_id)
+        request.session['products'] = new_bucket_list
+        return redirect(bucket)
+    else:
+        return redirect('/')
+
+
+# TODO: make function for + 1 product in bucket / - 1 product in bucket.
 
 """
 phone number = "+380441234567"
