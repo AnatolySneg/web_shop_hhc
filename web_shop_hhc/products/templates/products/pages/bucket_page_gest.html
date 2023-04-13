@@ -4,11 +4,12 @@
 
 {% block content %}
 <main>
-    {% if not bucket_ids %}
-        <h3>Your bucket is empty</h3>
+    <h5>Anonim user (gest)</h5>
+    {% if not product_quantity %}
+        <h1>Your bucket is empty</h1>
     {% else %}
         <div>
-            <h1>Your bucket:</h1>
+            <h5>Your bucket:</h5>
         </div>
         <table class="table">
           <thead class="text-center mb-4">
@@ -36,13 +37,13 @@
                   <td>{{ product.title }}</td>
                   <td>{{ product.price }} ₴</td>
                   <td>
-                      <a href="/more_to_bucket/{{ product.pk }}"><strong><</strong></a>
+                      <a href="/less_to_bucket/{{ product.pk }}"><strong><</strong></a>
                       {% for prod, quan in product_quantity.items %}
                         {% if prod == product.id %}
                             {{ quan }}
                         {% endif %}
                       {% endfor %}
-                      <a href="#"><strong>></strong></a>
+                      <a href="/more_to_bucket/{{ product.pk }}"><strong>></strong></a>
                   </td>
                   <td><a href="/remove_from_bucket/{{ product.pk }}" class="btn btn-warning">Remove from bucket</a></td>
                   <td>Price * quantity</td>

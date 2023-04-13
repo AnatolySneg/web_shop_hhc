@@ -50,10 +50,16 @@
                                     <a href="/product_detail/{{ product.pk }}" class="grey-text">
                                         <h6>{{ product.title }}</h6>
                                     </a>
-                                    <a>{{ product.id }}</a>
+                                    {% if product.is_sale %}
+                                        <h6>
+                                            <strike>
+                                                {{ product.price }} ₴
+                                            </strike>
+                                        </h6>
+                                    {% endif %}
                                     <h6>
                                         <strong>
-                                            <a href="#" class="dark-grey-text">{{ product.price }} ₴</a>
+                                            <a href="#" class="dark-grey-text">{{ product.get_price }} ₴</a>
                                         </strong>
                                     </h6>
                                     <h6 class="font-weight-bold blue-text">

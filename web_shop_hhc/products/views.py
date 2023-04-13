@@ -93,25 +93,6 @@ def user_page(request):
                   )
 
 
-def bucket(request):
-    context = {}
-    try:
-        bucket_ids = request.session.get('products')
-        product_quantity = {}
-        for id in bucket_ids:
-            product_quantity[id] = bucket_ids.count(id)
-        bucket_products = Product.objects.filter(id__in=bucket_ids)
-        context['bucket_ids'] = bucket_ids
-        context['bucket_products'] = bucket_products
-        context['product_quantity'] = product_quantity
-        context['active_page'] = "bucket"
-        # TODO: Check if !!!'bucket_ids' !!! needed?
-    except TypeError:
-        bucket_products = []
-        context['bucket_products'] = bucket_products
-    return render(request, 'products/pages/bucket_page_gest.html', context)
-
-
 def signup(request):
     # TODO: register only unique phones and emails
     if request.method == 'POST':
@@ -135,6 +116,26 @@ def signup(request):
                   )
 
 
+"""
+Bucket functions for Gest (Anonim Users) Start
+"""
+
+
+def bucket(request):
+    context = {'active_page': "bucket"}
+    try:
+        bucket_ids = request.session.get('products')
+        product_quantity = {}
+        for id_number in bucket_ids:
+            product_quantity[id_number] = bucket_ids.count(id_number)
+        bucket_products = Product.objects.filter(id__in=bucket_ids)
+        context['bucket_products'] = bucket_products
+        context['product_quantity'] = product_quantity
+    except TypeError:
+        context['product_quantity'] = []
+    return render(request, 'products/pages/bucket_page_gest.html', context)
+
+
 def add_to_bucket(request, product_id):
     if request.META.get('HTTP_REFERER'):
         bucket_products = request.session.get('products')
@@ -150,32 +151,32 @@ def add_to_bucket(request, product_id):
 
 
 def remove_from_bucket(request, product_pk):
-    if request.META.get('HTTP_REFERER'):
-        bucket_products = request.session.get('products')
-        new_bucket_list = []
-        for bucket_id in bucket_products:
-            if bucket_id != product_pk:
-                new_bucket_list.append(bucket_id)
-        request.session['products'] = new_bucket_list
-        return redirect(bucket)
-    else:
-        return redirect('/')
+    bucket_products = request.session.get('products')
+    new_bucket_list = bucket_products.copy()
+    for bucket_pk in bucket_products:
+        if bucket_pk == product_pk:
+            new_bucket_list.remove(bucket_pk)
+    request.session['products'] = new_bucket_list
+    return redirect(bucket)
 
-# TODO: JUST CREATED THIS FUNCTION, BEGIN FROM HERE!!!!
+
 def more_to_bucket(request, product_pk):
-    if request.META.get('HTTP_REFERER'):
-        bucket_products = request.session.get('products')
-        new_bucket_list = []
-        for bucket_id in bucket_products:
-            if bucket_id != product_pk:
-                new_bucket_list.append(bucket_id)
-        request.session['products'] = new_bucket_list
-        return redirect(bucket)
-    else:
-        return redirect('/')
+    product_in_bucket = request.session['products']
+    product_in_bucket.append(product_pk)
+    request.session['products'] = product_in_bucket
+    return redirect(bucket)
 
 
-# TODO: make function for + 1 product in bucket / - 1 product in bucket.
+def less_to_bucket(request, product_pk):
+    product_in_bucket = request.session['products']
+    product_in_bucket.remove(product_pk)
+    request.session['products'] = product_in_bucket
+    return redirect(bucket)
+
+
+"""
+Bucket functions for Gest (Anonim Users) End
+"""
 
 """
 phone number = "+380441234567"
