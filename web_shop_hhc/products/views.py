@@ -96,15 +96,21 @@ def user_page(request):
 def signup(request):
     # TODO: register only unique phones and emails
     if request.method == 'POST':
+        print("request.POST", request.POST)
         user_form = UserSignupForm(request.POST)
         customer_form = CustomerSignupForm(request.POST)
         if user_form.is_valid() and customer_form.is_valid():
             user = user_form.save()
             customer = customer_form.save(commit=False)
-            # TODO: what is below doing???
-            # customer.user = user
+            customer.user = user
             customer.save()
+            # username = request.POST['user']
+            # password = request.POST['password']
+            # auth_user = authenticate(username=username, password=password)
+            # if auth_user:
+            #     django_login(request, auth_user)
             return redirect('/')
+        # TODO: Make warning messages about invalid data in fields
     else:
         user_form = UserSignupForm()
         customer_form = CustomerSignupForm()

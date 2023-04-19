@@ -4,6 +4,11 @@ from django.contrib.auth.models import User
 from phonenumber_field.modelfields import PhoneNumberField
 
 
+class SignupError(Exception):
+    "Raise when, during signing up, user entered data which already exists in database."
+    pass
+
+
 class Category(models.Model):
     name = models.CharField(max_length=50)
 
@@ -33,6 +38,20 @@ class Product(models.Model):
 
     def get_images(self):
         return Image.objects.filter(product=self)
+
+    def get_price(self):
+        if self.is_sale:
+            final_price = self.price * (100 - self.discount) / 100
+        else:
+            final_price = self.price
+        return final_price
+
+
+"""
+Methods Image.save() and Image.delete() was made for making only one title image for each product. 
+Also, it working, when we add new image, deleting title image or changing title image amon other 
+product images, from Django admin panel. 
+"""
 
 
 class Image(models.Model):
@@ -86,7 +105,24 @@ class Comments(models.Model):
 
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    phone_number = PhoneNumberField(region="UA")
+    phone_number = PhoneNumberField(unique=True, region="UA")
     birth_date = models.DateField(null=True, blank=True)
 
-# TODO: make validation method save to provide registration users with same email, phone_numbers and Usernames.
+#     def save(self, username, email, phone, *args, **kwargs):
+#         common_user_data = User.objects.all()
+#         common_user_email = common_user_data.filter(email=email)
+#         common_user_username = User.objects.filter(username=username)
+#         common_customer_data = Customer.objects.all(phone_number=phone)
+#         common_customer_data = Customer.objects.all(phone_number=phone)
+#         common_customer_data = Customer.objects.all(phone_number=phone)
+#         common_customer_data.append(common_user_data)
+#         if not common_customer_data:
+#             return super(Customer, self).save(*args, **kwargs)
+#         else:
+#             raise ValueError
+#
+#
+# # TODO: make validation method in form to provide registration users with same email, phone_numbers and Usernames.
+#
+# class UserBucket(models.Model):
+#     pass
