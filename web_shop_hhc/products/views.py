@@ -104,13 +104,12 @@ def signup(request):
             customer = customer_form.save(commit=False)
             customer.user = user
             customer.save()
-            # username = request.POST['user']
-            # password = request.POST['password']
-            # auth_user = authenticate(username=username, password=password)
-            # if auth_user:
-            #     django_login(request, auth_user)
+            username = user.username
+            password = request.POST.get('password')
+            auth_user = authenticate(username=username, password=password)
+            if auth_user:
+                django_login(request, auth_user)
             return redirect('/')
-        # TODO: Make warning messages about invalid data in fields
     else:
         user_form = UserSignupForm()
         customer_form = CustomerSignupForm()
@@ -183,6 +182,31 @@ def less_to_bucket(request, product_pk):
 """
 Bucket functions for Gest (Anonim Users) End
 """
+
+
+
+"""
+Bucket functions for Autorised User Start
+"""
+
+def user_bucket(request):
+    context = {'active_page': "bucket"}
+    try:
+        bucket_ids = request.session.get('products')
+        product_quantity = {}
+        for id_number in bucket_ids:
+            product_quantity[id_number] = bucket_ids.count(id_number)
+        bucket_products = Product.objects.filter(id__in=bucket_ids)
+        context['bucket_products'] = bucket_products
+        context['product_quantity'] = product_quantity
+    except TypeError:
+        context['product_quantity'] = []
+    return render(request, 'products/pages/bucket_page_gest.html', context)
+
+"""
+Bucket functions for Autorised User End
+"""
+
 
 """
 phone number = "+380441234567"

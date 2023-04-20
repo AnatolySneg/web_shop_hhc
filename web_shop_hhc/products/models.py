@@ -108,21 +108,15 @@ class Customer(models.Model):
     phone_number = PhoneNumberField(unique=True, region="UA")
     birth_date = models.DateField(null=True, blank=True)
 
-#     def save(self, username, email, phone, *args, **kwargs):
-#         common_user_data = User.objects.all()
-#         common_user_email = common_user_data.filter(email=email)
-#         common_user_username = User.objects.filter(username=username)
-#         common_customer_data = Customer.objects.all(phone_number=phone)
-#         common_customer_data = Customer.objects.all(phone_number=phone)
-#         common_customer_data = Customer.objects.all(phone_number=phone)
-#         common_customer_data.append(common_user_data)
-#         if not common_customer_data:
-#             return super(Customer, self).save(*args, **kwargs)
-#         else:
-#             raise ValueError
+
+# class UserBucketProducts(models.Model):
+#     customer = models.ForeignKey(User, on_delete=models.CASCADE)
+#     bucket_products = models.ManyToManyField(Product)
+#     pass
 #
-#
-# # TODO: make validation method in form to provide registration users with same email, phone_numbers and Usernames.
-#
-# class UserBucket(models.Model):
+# class Order(models.Model):
+#     status = []
+#     order_date = ''
+#     relation_user = ''
+#     relation_product = ''
 #     pass

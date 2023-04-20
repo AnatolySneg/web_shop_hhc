@@ -9,7 +9,6 @@ from .models import Customer
 
 
 class UserSignupForm(UserCreationForm):
-
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2', ]
@@ -25,10 +24,8 @@ class UserSignupForm(UserCreationForm):
         print("is_db_email", is_db_email)
         if is_db_email:
             print("ValidationError")
-            raise ValidationError("Customer with this %(value)s already exist",
-                                  code="invalid",
-                                  params={'value': 'email'}
-                                  )
+            raise ValidationError("Email exist")
+
 
 
 class CustomerSignupForm(forms.ModelForm):
@@ -48,4 +45,3 @@ class CustomerSignupForm(forms.ModelForm):
     #                               code="invalid",
     #                               params={'value': 'phone number'}
     #                               )
-
