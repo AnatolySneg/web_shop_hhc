@@ -111,9 +111,10 @@ class Customer(models.Model):
 
 # class UserBucketProducts(models.Model):
 #     customer = models.ForeignKey(User, on_delete=models.CASCADE)
-#     bucket_products = models.ManyToManyField(Product)
+#     bucket_products = models.ManyToManyField(Product, on_delete=models.CASCADE)
+#     quantity = models.IntegerField(default=1)
 #     pass
-#
+
 # class Order(models.Model):
 #     status = []
 #     order_date = ''
