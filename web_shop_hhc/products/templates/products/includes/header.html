@@ -35,8 +35,10 @@
                         class="nav-link disabled" {% endif %} href="/user/"><strong>Buyer's personal account</strong></a>
                     {% endif %}
 
+
+<!--                    REWRITE FOR AUTHENTICATED USERS!!!     -->
                     <a {% if active_page == 'bucket' %} class="nav-link active" aria-current="page" {% else %}
-                    class="nav-link" {% endif %} href="/bucket/"><strong>Bucket {% if request.session.products %}({{ request.session.products | length }}){% endif %}</strong></a>
+                    class="nav-link" {% endif %} href="/bucket/"><strong>Bucket {% if header_bucket_counter %}({{ header_bucket_counter }}){% endif %}</strong></a>
                 </div>
             </div>
         </div>

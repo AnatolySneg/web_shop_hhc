@@ -42,7 +42,6 @@ INSTALLED_APPS = [
 ]
 MANUAL_APPS = [
     'products',
-    'customers',
 ]
 
 INSTALLED_APPS += MANUAL_APPS

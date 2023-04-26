@@ -21,13 +21,17 @@ class CustomerInline(admin.StackedInline):
 class UserAdmin(BaseUserAdmin):
     inlines = (CustomerInline, )
 
-    # pass
+
+# class UserBucketProductsAdmin(admin.ModelAdmin):
+#     list_display = ['id', '__str__', 'quantity']
+
 
 
 admin.site.unregister(User)
 # admin.site.register(User)
 admin.site.register(User, UserAdmin)
 admin.site.register(Product, ProductAdmin)
+# admin.site.register(UserBucketProducts, UserBucketProductsAdmin)
 admin.site.register(Category)
 admin.site.register(Type)
 admin.site.register(Image)
