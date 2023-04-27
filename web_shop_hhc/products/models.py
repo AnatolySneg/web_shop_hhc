@@ -42,10 +42,8 @@ class Product(models.Model):
 
     def get_price(self):
         if self.is_sale:
-            final_price = self.price * (100 - self.discount) / 100
-        else:
-            final_price = self.price
-        return final_price
+            return self.price * (100 - self.discount) / 100
+        return self.price
 
 
 """
@@ -65,7 +63,7 @@ class Image(models.Model):
 
     def save(self, *args, **kwargs):
         list_image_objects = Image.objects.filter(product=self.product)
-        if self in list_image_objects or self not in list_image_objects and self.title_image:
+        if self in list_image_objects or (self not in list_image_objects and self.title_image):
             for image in list_image_objects:
                 image.title_image = False
                 super(Image, image).save(args, **kwargs)
