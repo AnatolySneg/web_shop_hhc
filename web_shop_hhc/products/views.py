@@ -102,7 +102,7 @@ def bucket(request):
             personal_bucket = UserBucketProducts.objects.get(user_id=user_id)
             bucket_ids = personal_bucket.user_bucket['products_in_bucket']
         except UserBucketProducts.DoesNotExist:
-            bucket_ids = None
+            bucket_ids = {}
 
     else:
         bucket_ids = request.session.get('products')
@@ -113,9 +113,15 @@ def bucket(request):
         bucket_products = Product.objects.filter(id__in=bucket_ids)
         context['bucket_products'] = bucket_products
         context['product_quantity'] = product_quantity
+        request.session['products_for_order'] = product_quantity
     except TypeError:
-        context['product_quantity'] = []
+        context['product_quantity'] = {}
     return render(request, 'products/pages/bucket_page_gest.html', context)
+
+
+def order_first(request):
+    product_quantity = request.session.get('products_for_order')
+    pass
 
 
 def add_to_bucket(request, product_id):
@@ -123,7 +129,6 @@ def add_to_bucket(request, product_id):
         if request.user.is_authenticated:
             user_id = request.session.get('_auth_user_id')
             bucket_updater(user_id, product_id)
-            return redirect(request.META.get('HTTP_REFERER'))
         else:
             try:
                 products = request.session['products']
@@ -131,7 +136,7 @@ def add_to_bucket(request, product_id):
                 request.session['products'] = products
             except KeyError:
                 request.session['products'] = [product_id]
-            return redirect(request.META.get('HTTP_REFERER'))
+        return redirect(request.META.get('HTTP_REFERER'))
     else:
         return redirect(product_list)
 
@@ -182,4 +187,3 @@ def less_to_bucket(request, product_pk):
         product_in_bucket.remove(product_pk)
         request.session['products'] = product_in_bucket
     return redirect(bucket)
-

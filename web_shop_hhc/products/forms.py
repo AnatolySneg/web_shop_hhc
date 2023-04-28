@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
-from .models import Customer
+from .models import Customer, Order
 
 
 # TODO: ride https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method for extending forms!!!!
@@ -27,21 +27,14 @@ class UserSignupForm(UserCreationForm):
             raise ValidationError("Email exist")
 
 
-
 class CustomerSignupForm(forms.ModelForm):
     class Meta:
         model = Customer
         fields = ['phone_number', 'birth_date']
 
-    # def clean(self):
-    #     cleaned_data = super().clean()
-    #     phone_number = cleaned_data.get("phone_number")
-    #     print("phone_number", phone_number)
-    #     db_phone_numbers = Customer.objects.filter(phone_number=phone_number)
-    #     print("db_phone_numbers", db_phone_numbers)
-    #     if db_phone_numbers:
-    #         print("ValidationError")
-    #         raise ValidationError("Customer with this %(value)s already exist",
-    #                               code="invalid",
-    #                               params={'value': 'phone number'}
-    #                               )
+
+class OrderFirstCreationForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['first_name', 'middle_name', 'last_name', 'email', 'phone_number', 'delivery_option',
+                  'delivery_option']

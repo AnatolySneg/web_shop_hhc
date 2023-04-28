@@ -31,6 +31,7 @@ class Product(models.Model):
     price = models.FloatField()
     is_sale = models.BooleanField(default=False)
     discount = models.IntegerField(blank=True, null=True)
+    # TODO: Make positive integer field
     available_quantity = models.IntegerField(default=0)
     type = models.ForeignKey(Type, default=None, on_delete=models.CASCADE)
 
@@ -142,10 +143,78 @@ def header_bucket_counter(request):
     return products_bucket_quantity
 
 
+class Order(models.Model):
+    NEW = 'NEW'
+    CONFIRM = 'CONFIRM'
+    EXECUTION = 'EXECUTION'
+    COMPLETE = 'COMPLETE'
+    REJECT = 'REJECT'
 
-# class Order(models.Model):
-#     status = []
-#     order_date = ''
-#     relation_user = ''
-#     relation_product = ''
-#     pass
+    ORDER_STATUS = [
+        (NEW, 'New order'),
+        (CONFIRM, 'Confirmed order'),
+        (EXECUTION, 'Executing order'),
+        (COMPLETE, 'Completed order'),
+        (REJECT, 'Rejected order'),
+    ]
+
+    ONLINE_PAYMENT = 'ONLINE_PAYMENT'
+    PAYMENT_BY_CARD_ON_RECEIPT = 'PAYMENT_BY_CARD'
+    PAYMENT_IN_CASH_ON_RECEIPT = 'PAYMENT_IN_CASH'
+    CASH_ON_DELIVERY = 'CASH_ON_DELIVERY'
+
+    PAYMENT_OPTIONS = [
+        (ONLINE_PAYMENT, 'Online payment'),
+        (PAYMENT_BY_CARD_ON_RECEIPT, 'Payment by card upon receipt'),
+        (PAYMENT_IN_CASH_ON_RECEIPT, 'Cash payment'),
+        (CASH_ON_DELIVERY, 'Cash on delivery'),
+    ]
+
+    PICKUP = 'PICKUP'
+    STORE_COURIER = 'STORE_COURIER'
+    DELIVERY_SERVICE_1 = 'DELIVERY_SERVICE_1'
+    DELIVERY_SERVICE_2 = 'DELIVERY_SERVICE_2'
+    DELIVERY_SERVICE_3 = 'DELIVERY_SERVICE_3'
+
+    DELIVERY_OPTIONS = [
+        (PICKUP, 'Pickup'),
+        (STORE_COURIER, 'Store courier'),
+        (DELIVERY_SERVICE_1, 'Delivery service 1'),
+        (DELIVERY_SERVICE_2, 'Delivery service 2'),
+        (DELIVERY_SERVICE_3, 'Delivery service 3'),
+    ]
+
+    def products_ordered(*args, **kwargs):
+        if not args and not kwargs:
+            return {"products": {
+                'product id = 1': 'product quantity = 2',
+                'product id = 2': 'product quantity = 3',
+                'product id = 3': 'product quantity = 4',
+                'product id = 4': 'product quantity = 5',
+            }
+            }
+        else:
+
+            return {"products": {"None": None}}
+
+    status = models.CharField(choices=ORDER_STATUS, default=NEW, max_length=50)
+    created_date = models.DateTimeField(auto_now=True)
+    products = models.JSONField('Products in order', null=True)
+    # TODO: Make Foreinkey to user with null=True, instead of (is_customer)
+    is_customer = models.BooleanField(default=False)
+    username = models.CharField(null=True, max_length=150)
+    first_name = models.CharField(max_length=100)
+    middle_name = models.CharField(max_length=100, blank=True, null=True)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField(blank=True, null=True)
+    phone_number = PhoneNumberField(region="UA")
+
+    delivery_option = models.CharField(choices=DELIVERY_OPTIONS, default=PICKUP, max_length=50)
+    payment_option = models.CharField(choices=PAYMENT_OPTIONS, default=PAYMENT_BY_CARD_ON_RECEIPT, max_length=50)
+    destination_region = models.CharField(max_length=100, blank=True, null=True)
+    destination_country = models.CharField(max_length=50, null=True)
+    destination_delivery_service = models.CharField(max_length=100, null=True)
+    destination_street = models.CharField(max_length=100, null=True)
+    destination_house = models.CharField(max_length=20, null=True)
+    destination_apartment = models.CharField(max_length=20, blank=True, null=True)
+    order_date = models.DateTimeField(null=True, blank=True)

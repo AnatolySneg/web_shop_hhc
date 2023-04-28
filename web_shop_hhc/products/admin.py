@@ -30,6 +30,8 @@ class UserAdmin(BaseUserAdmin):
 admin.site.unregister(User)
 # admin.site.register(User)
 admin.site.register(User, UserAdmin)
+admin.site.register(Order)
+admin.site.register(UserBucketProducts)
 admin.site.register(Product, ProductAdmin)
 # admin.site.register(UserBucketProducts, UserBucketProductsAdmin)
 admin.site.register(Category)
