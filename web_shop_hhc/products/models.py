@@ -184,37 +184,26 @@ class Order(models.Model):
         (DELIVERY_SERVICE_3, 'Delivery service 3'),
     ]
 
-    def products_ordered(*args, **kwargs):
-        if not args and not kwargs:
-            return {"products": {
-                'product id = 1': 'product quantity = 2',
-                'product id = 2': 'product quantity = 3',
-                'product id = 3': 'product quantity = 4',
-                'product id = 4': 'product quantity = 5',
-            }
-            }
-        else:
-
-            return {"products": {"None": None}}
-
     status = models.CharField(choices=ORDER_STATUS, default=NEW, max_length=50)
     created_date = models.DateTimeField(auto_now=True)
     products = models.JSONField('Products in order', null=True)
-    # TODO: Make Foreinkey to user with null=True, instead of (is_customer)
-    is_customer = models.BooleanField(default=False)
-    username = models.CharField(null=True, max_length=150)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     first_name = models.CharField(max_length=100)
     middle_name = models.CharField(max_length=100, blank=True, null=True)
     last_name = models.CharField(max_length=100)
-    email = models.EmailField(blank=True, null=True)
+    email = models.EmailField(default=None)
     phone_number = PhoneNumberField(region="UA")
-
     delivery_option = models.CharField(choices=DELIVERY_OPTIONS, default=PICKUP, max_length=50)
-    payment_option = models.CharField(choices=PAYMENT_OPTIONS, default=PAYMENT_BY_CARD_ON_RECEIPT, max_length=50)
+
+    payment_option = models.CharField(choices=PAYMENT_OPTIONS, default=ONLINE_PAYMENT, max_length=50)
     destination_region = models.CharField(max_length=100, blank=True, null=True)
-    destination_country = models.CharField(max_length=50, null=True)
-    destination_delivery_service = models.CharField(max_length=100, null=True)
-    destination_street = models.CharField(max_length=100, null=True)
-    destination_house = models.CharField(max_length=20, null=True)
+    destination_country = models.CharField(max_length=50, blank=True, null=True)
+    destination_delivery_service = models.CharField(max_length=100, blank=True, null=True)
+    destination_street = models.CharField(max_length=100, blank=True, null=True)
+    destination_house = models.CharField(max_length=20, blank=True, null=True)
     destination_apartment = models.CharField(max_length=20, blank=True, null=True)
     order_date = models.DateTimeField(null=True, blank=True)
+
+
+def products_ordered(bucket_products):
+    return {"products": bucket_products}

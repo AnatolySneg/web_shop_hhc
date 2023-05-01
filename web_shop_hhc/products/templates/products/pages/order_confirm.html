@@ -1,0 +1,10 @@
+{% extends 'products/index.html' %}
+
+{% block content %}
+    <h1>Order (Final step)</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ order_options_form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+{% endblock %}

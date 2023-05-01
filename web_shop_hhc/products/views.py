@@ -4,6 +4,7 @@ from .models import *
 from django.contrib.auth import authenticate, login as django_login, logout as django_logout
 from .forms import *
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -187,3 +188,68 @@ def less_to_bucket(request, product_pk):
         product_in_bucket.remove(product_pk)
         request.session['products'] = product_in_bucket
     return redirect(bucket)
+
+
+@require_http_methods(["GET", "POST"])
+def order(request):
+    context = {}
+    if request.method == 'POST':
+        initiated_order = OrderFirstCreationForm(request.POST)
+        if initiated_order.is_valid():
+            order = initiated_order.save(commit=False)
+            order.created_date = timezone.now()
+            bucket_products = request.session.get('products_for_order')
+            order.products = {'products': bucket_products}
+            user_id = request.session.get('_auth_user_id')
+            some_user = order.user
+            if user_id:
+                user = User.objects.get(id=user_id)
+                order.user = user
+            order.save()
+            return redirect(order_confirm, order_id=order.id)
+    else:
+        context = {'initiated_order_form': OrderFirstCreationForm(), 'active_page': "bucket",
+                   'header_bucket_counter': header_bucket_counter(request)}
+    return render(request, 'products/pages/initiate_order.html', context)
+
+
+@require_http_methods(["GET", "POST"])
+def order_confirm(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if request.method == 'POST':
+        if order.delivery_option == Order.PICKUP:
+            order_options = OrderSecondPickupCreationForm(request.POST, instance=order)
+        elif order.delivery_option == Order.STORE_COURIER:
+            order_options = OrderSecondCourierCreationForm(request.POST, instance=order)
+        else:
+            order_options = OrderSecondDeliveryCreationForm(request.POST, instance=order)
+        if order_options.is_valid():
+            confirm_order = order_options.save(commit=False)
+            confirm_order.status = Order.CONFIRM
+            confirm_order.order_date = timezone.now()
+            confirm_order.save()
+            id = confirm_order.id
+        # TODO: write a context and template
+        context = {}
+        return redirect(order_page, confirm_order_id=confirm_order.id)
+    else:
+        if order.delivery_option == Order.PICKUP:
+            order_options = OrderSecondPickupCreationForm(instance=order)
+        elif order.delivery_option == Order.STORE_COURIER:
+            order_options = OrderSecondCourierCreationForm(instance=order)
+        else:
+            order_options = OrderSecondDeliveryCreationForm(instance=order)
+        context = {'order_options_form': order_options, 'active_page': "bucket",
+                   'header_bucket_counter': header_bucket_counter(request)}
+    return render(request, 'products/pages/order_confirm.html', context)
+
+
+# TODO: add view for Clear bucket button in template
+
+def order_page(request, confirm_order_id):
+    order = Order.objects.get(id=confirm_order_id)
+    context = {'active_page': "bucket", 'header_bucket_counter': header_bucket_counter(request),
+               "order": order}
+    return render(request, 'products/pages/order_page.html', context)
+
+# TODO: after order - clear all data from session about products and clear bucket
