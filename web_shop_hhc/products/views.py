@@ -14,6 +14,8 @@ def product_list(request):
     context = {'active_page': "home_page", 'header_bucket_counter': header_bucket_counter(request)}
     # TODO: Fielters and Sorting products !!!!
     context['products'] = Product.objects.all()
+    print(request.user)
+    print(request.user.id)
     return render(request, 'products/pages/home_page.html', context)
 
 
@@ -67,7 +69,6 @@ def user_page(request):
 
 @require_http_methods(["GET", "POST"])
 def signup(request):
-    # TODO: register only unique phones and emails
     if request.method == 'POST':
         print("request.POST", request.POST)
         user_form = UserSignupForm(request.POST)
@@ -97,10 +98,9 @@ def signup(request):
 
 def bucket(request):
     context = {'active_page': "bucket", 'header_bucket_counter': header_bucket_counter(request)}
-    user_id = request.session.get('_auth_user_id')
-    if user_id:
+    if request.user.is_authenticated:
         try:
-            personal_bucket = UserBucketProducts.objects.get(user_id=user_id)
+            personal_bucket = UserBucketProducts.objects.get(user_id=request.user.id)
             bucket_ids = personal_bucket.user_bucket['products_in_bucket']
         except UserBucketProducts.DoesNotExist:
             bucket_ids = {}
@@ -116,19 +116,14 @@ def bucket(request):
         context['product_quantity'] = product_quantity
         request.session['products_for_order'] = product_quantity
     except TypeError:
-        context['product_quantity'] = {}
+        context['product_quantity'] = product_quantity
     return render(request, 'products/pages/bucket_page_gest.html', context)
-
-
-def order_first(request):
-    product_quantity = request.session.get('products_for_order')
-    pass
 
 
 def add_to_bucket(request, product_id):
     if request.META.get('HTTP_REFERER'):
         if request.user.is_authenticated:
-            user_id = request.session.get('_auth_user_id')
+            user_id = request.user.id
             bucket_updater(user_id, product_id)
         else:
             try:
@@ -143,16 +138,14 @@ def add_to_bucket(request, product_id):
 
 
 def remove_from_bucket(request, product_pk):
-    user_id = request.session.get('_auth_user_id')
-
     def cleare_list(bucket_products, new_bucket_list):
         for bucket_id in bucket_products:
             if bucket_id == product_pk:
                 new_bucket_list.remove(bucket_id)
         return new_bucket_list
 
-    if user_id:
-        personal_bucket = UserBucketProducts.objects.get(user_id=user_id)
+    if request.user.is_authenticated:
+        personal_bucket = UserBucketProducts.objects.get(user_id=request.user.id)
         bucket_products = personal_bucket.user_bucket['products_in_bucket']
         new_bucket_list = bucket_products.copy()
         personal_bucket.user_bucket['products_in_bucket'] = cleare_list(bucket_products, new_bucket_list)
@@ -165,9 +158,8 @@ def remove_from_bucket(request, product_pk):
 
 
 def more_to_bucket(request, product_pk):
-    user_id = request.session.get('_auth_user_id')
-    if user_id:
-        personal_bucket = UserBucketProducts.objects.get(user_id=user_id)
+    if request.user.is_authenticated:
+        personal_bucket = UserBucketProducts.objects.get(user_id=request.user.id)
         personal_bucket.user_bucket['products_in_bucket'].append(product_pk)
         personal_bucket.save()
     else:
@@ -178,9 +170,8 @@ def more_to_bucket(request, product_pk):
 
 
 def less_to_bucket(request, product_pk):
-    user_id = request.session.get('_auth_user_id')
-    if user_id:
-        personal_bucket = UserBucketProducts.objects.get(user_id=user_id)
+    if request.user.is_authenticated:
+        personal_bucket = UserBucketProducts.objects.get(user_id=request.user.id)
         personal_bucket.user_bucket['products_in_bucket'].remove(product_pk)
         personal_bucket.save()
     else:
@@ -200,10 +191,8 @@ def order(request):
             order.created_date = timezone.now()
             bucket_products = request.session.get('products_for_order')
             order.products = {'products': bucket_products}
-            user_id = request.session.get('_auth_user_id')
-            some_user = order.user
-            if user_id:
-                user = User.objects.get(id=user_id)
+            if request.user.is_authenticated:
+                user = request.user
                 order.user = user
             order.save()
             return redirect(order_confirm, order_id=order.id)
@@ -228,9 +217,6 @@ def order_confirm(request, order_id):
             confirm_order.status = Order.CONFIRM
             confirm_order.order_date = timezone.now()
             confirm_order.save()
-            id = confirm_order.id
-        # TODO: write a context and template
-        context = {}
         return redirect(order_page, confirm_order_id=confirm_order.id)
     else:
         if order.delivery_option == Order.PICKUP:
@@ -244,12 +230,13 @@ def order_confirm(request, order_id):
     return render(request, 'products/pages/order_confirm.html', context)
 
 
-# TODO: add view for Clear bucket button in template
-
 def order_page(request, confirm_order_id):
+    if request.user.is_authenticated:
+        UserBucketProducts.objects.get(user_id=request.user.id).delete()
+    else:
+        request.session['products_for_order'] = {}
+        request.session['products'] = []
     order = Order.objects.get(id=confirm_order_id)
     context = {'active_page': "bucket", 'header_bucket_counter': header_bucket_counter(request),
                "order": order}
     return render(request, 'products/pages/order_page.html', context)
-
-# TODO: after order - clear all data from session about products and clear bucket
