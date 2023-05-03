@@ -41,6 +41,9 @@ class Product(models.Model):
     def get_images(self):
         return Image.objects.filter(product=self)
 
+    def get_title_image(self):
+        return Image.objects.get(product=self, title_image=True)
+
     def get_price(self):
         if self.is_sale:
             return self.price * (100 - self.discount) / 100

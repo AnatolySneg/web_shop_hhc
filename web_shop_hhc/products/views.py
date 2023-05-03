@@ -5,11 +5,12 @@ from django.contrib.auth import authenticate, login as django_login, logout as d
 from .forms import *
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 from django.utils import timezone
+from .logic.products import Bucket
 from django.views.decorators.csrf import csrf_exempt
 
 
 # @csrf_exempt
-# @require_GET
+@require_GET
 def product_list(request):
     context = {'active_page': "home_page", 'header_bucket_counter': header_bucket_counter(request)}
     # TODO: Fielters and Sorting products !!!!
@@ -19,6 +20,7 @@ def product_list(request):
     return render(request, 'products/pages/home_page.html', context)
 
 
+@require_GET
 def product_detail(request, product_pk):
     context = {'active_page': "home_page", 'header_bucket_counter': header_bucket_counter(request)}
     product = get_object_or_404(Product, pk=product_pk)
@@ -29,6 +31,7 @@ def product_detail(request, product_pk):
     return render(request, 'products/pages/product_detail.html', context)
 
 
+@require_GET
 def contacts_page(request):
     context = {'active_page': "contacts_page", 'header_bucket_counter': header_bucket_counter(request)}
     test_string = "This string was rendered from views.contacts_page()"
@@ -36,6 +39,7 @@ def contacts_page(request):
     return render(request, 'products/pages/about_us.html', context)
 
 
+@require_http_methods(["GET", "POST"])
 def login_page(request):
     context = {'header_bucket_counter': header_bucket_counter(request)}
     if request.method == "POST":
@@ -56,11 +60,13 @@ def login_page(request):
     return render(request, 'products/pages/login_page.html', context)
 
 
+@require_GET
 def logout(request):
     django_logout(request)
     return redirect(request.META.get('HTTP_REFERER'))
 
 
+@require_GET
 def user_page(request):
     context = {'active_page': "user_page"}
     context['test_string'] = "USER PAGE"
@@ -96,89 +102,59 @@ def signup(request):
                   )
 
 
-def bucket(request):
+@require_GET
+def bucket_page(request):
     context = {'active_page': "bucket", 'header_bucket_counter': header_bucket_counter(request)}
-    if request.user.is_authenticated:
-        try:
-            personal_bucket = UserBucketProducts.objects.get(user_id=request.user.id)
-            bucket_ids = personal_bucket.user_bucket['products_in_bucket']
-        except UserBucketProducts.DoesNotExist:
-            bucket_ids = {}
-
+    bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
+    if bucket.bucket_ids:
+        bucket_products = Product.objects.filter(id__in=bucket.bucket_ids)
     else:
-        bucket_ids = request.session.get('products')
-    product_quantity = {}
-    try:
-        for id_number in bucket_ids:
-            product_quantity[id_number] = bucket_ids.count(id_number)
-        bucket_products = Product.objects.filter(id__in=bucket_ids)
-        context['bucket_products'] = bucket_products
-        context['product_quantity'] = product_quantity
-        request.session['products_for_order'] = product_quantity
-    except TypeError:
-        context['product_quantity'] = product_quantity
+        bucket_products = []
+    request.session['products'] = bucket.bucket_ids
+    context['bucket_products'] = bucket_products
+    context['product_quantity'] = bucket.product_quantity
+    # TODO: maybe should put below row in adding or removing views
+    # request.session['products_for_order'] = bucket.product_quantity
     return render(request, 'products/pages/bucket_page_gest.html', context)
 
 
+@require_GET
 def add_to_bucket(request, product_id):
     if request.META.get('HTTP_REFERER'):
-        if request.user.is_authenticated:
-            user_id = request.user.id
-            bucket_updater(user_id, product_id)
-        else:
-            try:
-                products = request.session['products']
-                products.append(product_id)
-                request.session['products'] = products
-            except KeyError:
-                request.session['products'] = [product_id]
+        bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
+        bucket.add_product(product_id)
+        request.session['products'] = bucket.bucket_ids
+        request.session['products_for_order'] = bucket.product_quantity
         return redirect(request.META.get('HTTP_REFERER'))
     else:
         return redirect(product_list)
 
 
-def remove_from_bucket(request, product_pk):
-    def cleare_list(bucket_products, new_bucket_list):
-        for bucket_id in bucket_products:
-            if bucket_id == product_pk:
-                new_bucket_list.remove(bucket_id)
-        return new_bucket_list
-
-    if request.user.is_authenticated:
-        personal_bucket = UserBucketProducts.objects.get(user_id=request.user.id)
-        bucket_products = personal_bucket.user_bucket['products_in_bucket']
-        new_bucket_list = bucket_products.copy()
-        personal_bucket.user_bucket['products_in_bucket'] = cleare_list(bucket_products, new_bucket_list)
-        personal_bucket.save()
-    else:
-        bucket_products = request.session.get('products')
-        new_bucket_list = bucket_products.copy()
-        request.session['products'] = cleare_list(bucket_products, new_bucket_list)
-    return redirect(bucket)
+@require_GET
+def remove_from_bucket(request, product_id):
+    bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
+    bucket.remove_products(product_id)
+    request.session['products'] = bucket.bucket_ids
+    request.session['products_for_order'] = bucket.product_quantity
+    return redirect(bucket_page)
 
 
-def more_to_bucket(request, product_pk):
-    if request.user.is_authenticated:
-        personal_bucket = UserBucketProducts.objects.get(user_id=request.user.id)
-        personal_bucket.user_bucket['products_in_bucket'].append(product_pk)
-        personal_bucket.save()
-    else:
-        product_in_bucket = request.session['products']
-        product_in_bucket.append(product_pk)
-        request.session['products'] = product_in_bucket
-    return redirect(bucket)
+@require_GET
+def more_to_bucket(request, product_id):
+    bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
+    bucket.increase(product_id)
+    request.session['products'] = bucket.bucket_ids
+    request.session['products_for_order'] = bucket.product_quantity
+    return redirect(bucket_page)
 
 
-def less_to_bucket(request, product_pk):
-    if request.user.is_authenticated:
-        personal_bucket = UserBucketProducts.objects.get(user_id=request.user.id)
-        personal_bucket.user_bucket['products_in_bucket'].remove(product_pk)
-        personal_bucket.save()
-    else:
-        product_in_bucket = request.session['products']
-        product_in_bucket.remove(product_pk)
-        request.session['products'] = product_in_bucket
-    return redirect(bucket)
+@require_GET
+def less_to_bucket(request, product_id):
+    bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
+    bucket.decrease(product_id)
+    request.session['products'] = bucket.bucket_ids
+    request.session['products_for_order'] = bucket.product_quantity
+    return redirect(bucket_page)
 
 
 @require_http_methods(["GET", "POST"])
@@ -230,6 +206,7 @@ def order_confirm(request, order_id):
     return render(request, 'products/pages/order_confirm.html', context)
 
 
+@require_GET
 def order_page(request, confirm_order_id):
     if request.user.is_authenticated:
         UserBucketProducts.objects.get(user_id=request.user.id).delete()

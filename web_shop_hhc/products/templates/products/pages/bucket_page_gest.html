@@ -25,26 +25,22 @@
             {% for product in bucket_products %}
                 <tr class="text-center mb-4">
                   <th scope="row">
-                      {% for img in product.get_images %}
-                        {% if img.title_image %}
-                            <div class="image">
-                                <img src={{img.image.url}} width="80">
-                            </div>
-                        {% endif %}
-                      {% endfor %}
+                    <div class="image">
+                        <img src={{product.get_title_image.image.url}} width="80">
+                    </div>
                   </th>
                   <td>{{ product.title }}</td>
                   <td>{{ product.price }} ₴</td>
                   <td>
-                      <a href="/less_to_bucket/{{ product.pk }}"><strong><</strong></a>
+                      <a href="/less_to_bucket/{{ product.id }}"><strong><</strong></a>
                       {% for prod, quan in product_quantity.items %}
                         {% if prod == product.id %}
                             {{ quan }}
                         {% endif %}
                       {% endfor %}
-                      <a href="/more_to_bucket/{{ product.pk }}"><strong>></strong></a>
+                      <a href="/more_to_bucket/{{ product.id }}"><strong>></strong></a>
                   </td>
-                  <td><a href="/remove_from_bucket/{{ product.pk }}" class="btn btn-warning">Remove from bucket</a></td>
+                  <td><a href="/remove_from_bucket/{{ product.id }}" class="btn btn-warning">Remove from bucket</a></td>
                   <td>Price * quantity</td>
                 </tr>
             {% endfor %}
