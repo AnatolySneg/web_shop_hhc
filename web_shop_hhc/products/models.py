@@ -2,12 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import User
 from phonenumber_field.modelfields import PhoneNumberField
-from django.core.exceptions import ObjectDoesNotExist
-
-
-class SignupError(Exception):
-    "Raise when, during signing up, user entered data which already exists in database."
-    pass
+from django.utils import timezone
 
 
 class Category(models.Model):
@@ -36,7 +31,7 @@ class Product(models.Model):
     type = models.ForeignKey(Type, default=None, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.title} | product id - {self.id}'
+        return f'{self.title}, product id - {self.id}'
 
     def get_images(self):
         return Image.objects.filter(product=self)
@@ -120,32 +115,6 @@ class UserBucketProducts(models.Model):
         return "{}'s bucket".format(self.user.username)
 
 
-# TODO: make below functions, UserBucketProducts methods also in view.
-def bucket_updater(user_id, product_id):
-    try:
-        personal_bucket = UserBucketProducts.objects.get(user_id=user_id)
-        personal_bucket.user_bucket['products_in_bucket'].append(product_id)
-        personal_bucket.save()
-    except UserBucketProducts.DoesNotExist:
-        UserBucketProducts.objects.create(user_id=user_id, user_bucket={'products_in_bucket': [product_id]})
-
-
-def header_bucket_counter(request):
-    user_id = request.session.get('_auth_user_id')
-    if user_id:
-        try:
-            bucket_object = UserBucketProducts.objects.get(user_id=user_id)
-            products_bucket_quantity = len(bucket_object.user_bucket['products_in_bucket'])
-        except UserBucketProducts.DoesNotExist:
-            products_bucket_quantity = 0
-    else:
-        try:
-            products_bucket_quantity = len(request.session.get('products'))
-        except Exception:
-            products_bucket_quantity = 0
-    return products_bucket_quantity
-
-
 class Order(models.Model):
     NEW = 'NEW'
     CONFIRM = 'CONFIRM'
@@ -207,6 +176,26 @@ class Order(models.Model):
     destination_apartment = models.CharField(max_length=20, blank=True, null=True)
     order_date = models.DateTimeField(null=True, blank=True)
 
+    def __str__(self):
+        return '{}, user - {}, full name: {} {}, delivery option: {}'.format(self.status, self.user,
+                                                                             self.first_name, self.last_name,
+                                                                             self.delivery_option)
 
-def products_ordered(bucket_products):
-    return {"products": bucket_products}
+
+def new_order_updater(initiated_order, user, product_quantity):
+    new_order = initiated_order.save(commit=False)
+    new_order.created_date = timezone.now()
+    bucket_products = product_quantity
+    new_order.products = {'products': bucket_products}
+    if user:
+        new_order.user = user
+    new_order.save()
+    return new_order
+
+
+def confirm_order_updater(order_form):
+    confirm_order = order_form.save(commit=False)
+    confirm_order.status = Order.CONFIRM
+    confirm_order.order_date = timezone.now()
+    confirm_order.save()
+    return confirm_order

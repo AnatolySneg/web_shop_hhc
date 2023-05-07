@@ -1,18 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, HttpRequest
 from .models import *
 from django.contrib.auth import authenticate, login as django_login, logout as django_logout
 from .forms import *
-from django.views.decorators.http import require_GET, require_POST, require_http_methods
-from django.utils import timezone
-from .logic.products import Bucket
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_http_methods
+from .logic.products import Bucket, Ordering
+
+
+# from django.views.decorators.csrf import csrf_exempt
 
 
 # @csrf_exempt
 @require_GET
 def product_list(request):
-    context = {'active_page': "home_page", 'header_bucket_counter': header_bucket_counter(request)}
+    context = {'active_page': "home_page",
+               'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
     # TODO: Fielters and Sorting products !!!!
     context['products'] = Product.objects.all()
     print(request.user)
@@ -21,10 +22,11 @@ def product_list(request):
 
 
 @require_GET
-def product_detail(request, product_pk):
-    context = {'active_page': "home_page", 'header_bucket_counter': header_bucket_counter(request)}
-    product = get_object_or_404(Product, pk=product_pk)
-    images = Image.objects.filter(product_id=product_pk)
+def product_detail(request, product_id):
+    context = {'active_page': "home_page",
+               'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
+    product = get_object_or_404(Product, id=product_id)
+    images = Image.objects.filter(product_id=product_id)
     # TODO: change pk to id in all files
     context['product'] = product
     context['images'] = images
@@ -33,7 +35,8 @@ def product_detail(request, product_pk):
 
 @require_GET
 def contacts_page(request):
-    context = {'active_page': "contacts_page", 'header_bucket_counter': header_bucket_counter(request)}
+    context = {'active_page': "contacts_page",
+               'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
     test_string = "This string was rendered from views.contacts_page()"
     context['test_string'] = test_string
     return render(request, 'products/pages/about_us.html', context)
@@ -41,7 +44,7 @@ def contacts_page(request):
 
 @require_http_methods(["GET", "POST"])
 def login_page(request):
-    context = {'header_bucket_counter': header_bucket_counter(request)}
+    context = {'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
     if request.method == "POST":
         phone_number = request.POST['phone']
         # TODO: make validator for signs of phone number
@@ -97,15 +100,15 @@ def signup(request):
         'user_form': user_form,
         'customer_form': customer_form,
         'active_page': "signup_page",
-        'header_bucket_counter': header_bucket_counter(request),
+        'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products')),
     }
                   )
 
 
 @require_GET
 def bucket_page(request):
-    context = {'active_page': "bucket", 'header_bucket_counter': header_bucket_counter(request)}
     bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
+    context = {'active_page': "bucket", 'header_bucket_counter': len(bucket.product_ids)}
     if bucket.product_ids:
         bucket_products = Product.objects.filter(id__in=bucket.product_ids)
     else:
@@ -113,8 +116,6 @@ def bucket_page(request):
     request.session['products'] = bucket.product_ids
     context['bucket_products'] = bucket_products
     context['product_quantity'] = bucket.product_quantity
-    # TODO: maybe should put below row in adding or removing views
-    # request.session['products_for_order'] = bucket.product_quantity
     return render(request, 'products/pages/bucket_page.html', context)
 
 
@@ -167,62 +168,43 @@ def clear_bucket(request):
 
 
 @require_http_methods(["GET", "POST"])
-def order(request):
-    context = {}
+def order_new(request):
     if request.method == 'POST':
         initiated_order = OrderFirstCreationForm(request.POST)
         if initiated_order.is_valid():
-            order = initiated_order.save(commit=False)
-            order.created_date = timezone.now()
-            bucket_products = request.session.get('products_for_order')
-            order.products = {'products': bucket_products}
-            if request.user.is_authenticated:
-                user = request.user
-                order.user = user
-            order.save()
-            return redirect(order_confirm, order_id=order.id)
-    else:
-        context = {'initiated_order_form': OrderFirstCreationForm(), 'active_page': "bucket",
-                   'header_bucket_counter': header_bucket_counter(request)}
+            bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
+            new_order = new_order_updater(initiated_order, request.user, bucket.product_quantity)
+            return redirect(order_confirm, order_id=new_order.id)
+    context = {'initiated_order_form': OrderFirstCreationForm(), 'active_page': "bucket",
+               'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
     return render(request, 'products/pages/initiate_order.html', context)
 
 
 @require_http_methods(["GET", "POST"])
 def order_confirm(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
+    new_order = Ordering(order_id)
+    form = new_order.get_optional_form()
     if request.method == 'POST':
-        if order.delivery_option == Order.PICKUP:
-            order_options = OrderSecondPickupCreationForm(request.POST, instance=order)
-        elif order.delivery_option == Order.STORE_COURIER:
-            order_options = OrderSecondCourierCreationForm(request.POST, instance=order)
-        else:
-            order_options = OrderSecondDeliveryCreationForm(request.POST, instance=order)
-        if order_options.is_valid():
-            confirm_order = order_options.save(commit=False)
-            confirm_order.status = Order.CONFIRM
-            confirm_order.order_date = timezone.now()
-            confirm_order.save()
-        return redirect(order_page, confirm_order_id=confirm_order.id)
+        order_form = form(request.POST, instance=new_order.order)
+        if order_form.is_valid():
+            confirm_order = confirm_order_updater(order_form)
+            return redirect(order_page, confirm_order_id=confirm_order.id)
     else:
-        if order.delivery_option == Order.PICKUP:
-            order_options = OrderSecondPickupCreationForm(instance=order)
-        elif order.delivery_option == Order.STORE_COURIER:
-            order_options = OrderSecondCourierCreationForm(instance=order)
-        else:
-            order_options = OrderSecondDeliveryCreationForm(instance=order)
-        context = {'order_options_form': order_options, 'active_page': "bucket",
-                   'header_bucket_counter': header_bucket_counter(request)}
+        order_form = form(instance=new_order.order)
+    context = {'order_options_form': order_form, 'active_page': "bucket",
+               'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
     return render(request, 'products/pages/order_confirm.html', context)
 
 
 @require_GET
 def order_page(request, confirm_order_id):
-    if request.user.is_authenticated:
-        UserBucketProducts.objects.get(user_id=request.user.id).delete()
-    else:
-        request.session['products_for_order'] = {}
-        request.session['products'] = []
-    order = Order.objects.get(id=confirm_order_id)
-    context = {'active_page': "bucket", 'header_bucket_counter': header_bucket_counter(request),
+    bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
+    bucket.clear()
+    confirmed_order = Ordering(confirm_order_id)
+    order = confirmed_order.order
+
+    request.session['products_for_order'] = bucket.product_quantity
+    request.session['products'] = bucket.product_ids
+    context = {'active_page': "bucket", 'header_bucket_counter': len(bucket.product_ids),
                "order": order}
     return render(request, 'products/pages/order_page.html', context)

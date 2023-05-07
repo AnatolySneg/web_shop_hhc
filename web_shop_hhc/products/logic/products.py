@@ -1,4 +1,5 @@
-from ..models import UserBucketProducts
+from ..models import UserBucketProducts, Order
+from ..forms import OrderSecondPickupCreationForm, OrderSecondCourierCreationForm, OrderSecondDeliveryCreationForm
 
 
 class Bucket:
@@ -32,7 +33,7 @@ class Bucket:
     # TODO: refactor of data type, for saving products in bucket.
     """
     user_id - incoming integer data-type, if user is authenticate, or None type if else.
-    session_products_ids -  incoming list data-type, if bucket was updated at least once for current session, 
+    session_products_ids - incoming list data-type, if bucket was updated at least once for current session, 
     or None type if else.
     """
 
@@ -60,3 +61,30 @@ class Bucket:
     def clear(self):
         self.product_ids = []
         self._refresh_bucket_state()
+
+    @staticmethod
+    def header_bucket_counter(products_in_bucket):
+        if products_in_bucket:
+            return len(products_in_bucket)
+        return 0
+
+
+class Ordering:
+    def _get_delivery_option(self):
+        order = Order.objects.get(id=self.order_id)
+        self.order = order
+        self.delivery_option = order.delivery_option
+
+    def __init__(self, order_id):
+        self.order_id = order_id
+        self._get_delivery_option()
+
+    def get_optional_form(self):
+        order_options = {
+            Order.PICKUP: OrderSecondPickupCreationForm,
+            Order.STORE_COURIER: OrderSecondCourierCreationForm,
+            Order.DELIVERY_SERVICE_1: OrderSecondDeliveryCreationForm,
+            Order.DELIVERY_SERVICE_2: OrderSecondDeliveryCreationForm,
+            Order.DELIVERY_SERVICE_3: OrderSecondDeliveryCreationForm,
+                         }
+        return order_options[self.delivery_option]

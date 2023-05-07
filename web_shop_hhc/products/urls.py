@@ -11,7 +11,7 @@ urlpatterns = [
     path('signup/', signup),
     path('logout/', logout),
     path('user/', user_page),
-    path('product_detail/<int:product_pk>/', product_detail),
+    path('product_detail/<int:product_id>/', product_detail),
 ]
 
 bucket_urls = [
@@ -26,7 +26,7 @@ bucket_urls = [
 urlpatterns += bucket_urls
 
 order_urls = [
-    path('order/', order),
+    path('order/', order_new),
     path('order/<int:order_id>', order_confirm),
     path('order_page/<int:confirm_order_id>', order_page),
 ]
