@@ -106,16 +106,16 @@ def signup(request):
 def bucket_page(request):
     context = {'active_page': "bucket", 'header_bucket_counter': header_bucket_counter(request)}
     bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
-    if bucket.bucket_ids:
-        bucket_products = Product.objects.filter(id__in=bucket.bucket_ids)
+    if bucket.product_ids:
+        bucket_products = Product.objects.filter(id__in=bucket.product_ids)
     else:
         bucket_products = []
-    request.session['products'] = bucket.bucket_ids
+    request.session['products'] = bucket.product_ids
     context['bucket_products'] = bucket_products
     context['product_quantity'] = bucket.product_quantity
     # TODO: maybe should put below row in adding or removing views
     # request.session['products_for_order'] = bucket.product_quantity
-    return render(request, 'products/pages/bucket_page_gest.html', context)
+    return render(request, 'products/pages/bucket_page.html', context)
 
 
 @require_GET
@@ -123,7 +123,7 @@ def add_to_bucket(request, product_id):
     if request.META.get('HTTP_REFERER'):
         bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
         bucket.add_product(product_id)
-        request.session['products'] = bucket.bucket_ids
+        request.session['products'] = bucket.product_ids
         request.session['products_for_order'] = bucket.product_quantity
         return redirect(request.META.get('HTTP_REFERER'))
     else:
@@ -134,7 +134,7 @@ def add_to_bucket(request, product_id):
 def remove_from_bucket(request, product_id):
     bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
     bucket.remove_products(product_id)
-    request.session['products'] = bucket.bucket_ids
+    request.session['products'] = bucket.product_ids
     request.session['products_for_order'] = bucket.product_quantity
     return redirect(bucket_page)
 
@@ -142,8 +142,8 @@ def remove_from_bucket(request, product_id):
 @require_GET
 def more_to_bucket(request, product_id):
     bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
-    bucket.increase(product_id)
-    request.session['products'] = bucket.bucket_ids
+    bucket.add_product(product_id)
+    request.session['products'] = bucket.product_ids
     request.session['products_for_order'] = bucket.product_quantity
     return redirect(bucket_page)
 
@@ -151,8 +151,17 @@ def more_to_bucket(request, product_id):
 @require_GET
 def less_to_bucket(request, product_id):
     bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
-    bucket.decrease(product_id)
-    request.session['products'] = bucket.bucket_ids
+    bucket.decrease_product(product_id)
+    request.session['products'] = bucket.product_ids
+    request.session['products_for_order'] = bucket.product_quantity
+    return redirect(bucket_page)
+
+
+@require_GET
+def clear_bucket(request):
+    bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
+    bucket.clear()
+    request.session['products'] = bucket.product_ids
     request.session['products_for_order'] = bucket.product_quantity
     return redirect(bucket_page)
 

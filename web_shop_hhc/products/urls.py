@@ -20,6 +20,7 @@ bucket_urls = [
     path('more_to_bucket/<int:product_id>', more_to_bucket),
     path('less_to_bucket/<int:product_id>', less_to_bucket),
     path('remove_from_bucket/<int:product_id>', remove_from_bucket),
+    path('clear_bucket/', clear_bucket),
 ]
 
 urlpatterns += bucket_urls
@@ -28,10 +29,6 @@ order_urls = [
     path('order/', order),
     path('order/<int:order_id>', order_confirm),
     path('order_page/<int:confirm_order_id>', order_page),
-    # path('add_to_user_bucket/<int:product_id>', add_to_user_bucket),
-    # path('more_to_bucket/<int:product_pk>', more_to_bucket),
-    # path('less_to_bucket/<int:product_pk>', less_to_bucket),
-    # path('remove_from_bucket/<int:product_pk>', remove_from_bucket),
 ]
 
 
