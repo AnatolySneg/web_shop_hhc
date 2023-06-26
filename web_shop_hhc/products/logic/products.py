@@ -92,18 +92,27 @@ class Ordering:
         return order_options[self.delivery_option]
 
     def send_order_mail_report(self):
-        text = 'Thank you, order №{order_id} accepted:'.format(order_id=self.order_id)
+        customer_text = 'Thank you, order №{order_id} accepted:'.format(order_id=self.order_id)
+        admin_text = 'New order №{order_id}:'.format(order_id=self.order_id)
         id_quantity = self.order.products['products']
         products = Product.objects.filter(id__in=id_quantity)
-
+        total_price = 0
         for id in id_quantity:
             product = products.get(id=id)
-            text += '\n\t*\t{title} - {quantity} units.'.format(title=product.title, quantity=id_quantity[id])
-        text += '\n\nOur manager will contact you shortly.'
-        text += '\n\thttp://127.0.0.1:8000/about_us/'
+            product_quantity = id_quantity[id]
+            units_price = round(product.get_price() * product_quantity, 2)
+            total_price += units_price
+            text = '\n\t*\t{title} - {quantity} units - {price} ₴.'.format(title=product.title,
+                                                                           quantity=product_quantity,
+                                                                           price=units_price)
+            customer_text += text
+            admin_text += text
+        customer_text += '\n\nOur manager will contact you shortly.'
+        #TODO: Add admin text for sending email with all data
         send_mail(
             subject="Order №{} in Web shop HHC".format(self.order_id),
-            message=text,
+            message=customer_text,
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[settings.RECIPIENT_ADDRESS]
         )
+        # TODO: Change recipient_list to self.order.email

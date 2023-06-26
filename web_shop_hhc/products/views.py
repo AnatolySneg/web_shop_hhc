@@ -18,8 +18,6 @@ def product_list(request):
                'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
     # TODO: Fielters and Sorting products !!!!
     context['products'] = Product.objects.all()
-    print(request.user)
-    print(request.user.id)
     return render(request, 'products/pages/home_page.html', context)
 
 
@@ -75,12 +73,6 @@ def logout(request):
 def user_page(request):
     context = {'active_page': "user_page"}
     context['test_string'] = "USER PAGE"
-    # send_mail(
-    #     subject="Subject email",
-    #     message="Here is text message.",
-    #     from_email=settings.EMAIL_HOST_USER,
-    #     recipient_list=[settings.RECIPIENT_ADDRESS]
-    # )
     return render(request, 'products/pages/user_page.html', context)
 
 
