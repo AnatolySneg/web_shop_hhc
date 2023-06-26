@@ -4,6 +4,8 @@ from django.contrib.auth import authenticate, login as django_login, logout as d
 from .forms import *
 from django.views.decorators.http import require_GET, require_http_methods
 from .logic.products import Bucket, Ordering
+from django.core.mail import send_mail
+from django.conf import settings
 
 
 # from django.views.decorators.csrf import csrf_exempt
@@ -73,6 +75,12 @@ def logout(request):
 def user_page(request):
     context = {'active_page': "user_page"}
     context['test_string'] = "USER PAGE"
+    # send_mail(
+    #     subject="Subject email",
+    #     message="Here is text message.",
+    #     from_email=settings.EMAIL_HOST_USER,
+    #     recipient_list=[settings.RECIPIENT_ADDRESS]
+    # )
     return render(request, 'products/pages/user_page.html', context)
 
 
@@ -174,6 +182,7 @@ def order_new(request):
         if initiated_order.is_valid():
             bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
             new_order = new_order_updater(initiated_order, request.user, bucket.product_quantity)
+            # TODO: ERROR while ordering by a INKOGNITO user, must fix!!!
             return redirect(order_confirm, order_id=new_order.id)
     context = {'initiated_order_form': OrderFirstCreationForm(), 'active_page': "bucket",
                'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
@@ -202,6 +211,7 @@ def order_page(request, confirm_order_id):
     bucket.clear()
     confirmed_order = Ordering(confirm_order_id)
     order = confirmed_order.order
+    confirmed_order.send_order_mail_report()
 
     request.session['products_for_order'] = bucket.product_quantity
     request.session['products'] = bucket.product_ids

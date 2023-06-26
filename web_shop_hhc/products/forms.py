@@ -30,7 +30,7 @@ class UserSignupForm(UserCreationForm):
 class CustomerSignupForm(ModelForm):
     class Meta:
         model = Customer
-        fields = ['phone_number', 'birth_date']
+        fields = ['phone_number']
 
 
 class OrderFirstCreationForm(ModelForm):

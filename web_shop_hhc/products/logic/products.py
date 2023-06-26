@@ -1,5 +1,7 @@
-from ..models import UserBucketProducts, Order
+from ..models import UserBucketProducts, Order, Product
 from ..forms import OrderSecondPickupCreationForm, OrderSecondCourierCreationForm, OrderSecondDeliveryCreationForm
+from django.core.mail import send_mail
+from django.conf import settings
 
 
 class Bucket:
@@ -86,5 +88,22 @@ class Ordering:
             Order.DELIVERY_SERVICE_1: OrderSecondDeliveryCreationForm,
             Order.DELIVERY_SERVICE_2: OrderSecondDeliveryCreationForm,
             Order.DELIVERY_SERVICE_3: OrderSecondDeliveryCreationForm,
-                         }
+        }
         return order_options[self.delivery_option]
+
+    def send_order_mail_report(self):
+        text = 'Thank you, order №{order_id} accepted:'.format(order_id=self.order_id)
+        id_quantity = self.order.products['products']
+        products = Product.objects.filter(id__in=id_quantity)
+
+        for id in id_quantity:
+            product = products.get(id=id)
+            text += '\n\t*\t{title} - {quantity} units.'.format(title=product.title, quantity=id_quantity[id])
+        text += '\n\nOur manager will contact you shortly.'
+        text += '\n\thttp://127.0.0.1:8000/about_us/'
+        send_mail(
+            subject="Order №{} in Web shop HHC".format(self.order_id),
+            message=text,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[settings.RECIPIENT_ADDRESS]
+        )

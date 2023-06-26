@@ -104,7 +104,6 @@ class Comments(models.Model):
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone_number = PhoneNumberField(unique=True, region="UA")
-    birth_date = models.DateField(null=True, blank=True)
 
 
 class UserBucketProducts(models.Model):
@@ -187,7 +186,7 @@ def new_order_updater(initiated_order, user, product_quantity):
     new_order.created_date = timezone.now()
     bucket_products = product_quantity
     new_order.products = {'products': bucket_products}
-    if user:
+    if user.is_authenticated:
         new_order.user = user
     new_order.save()
     return new_order
