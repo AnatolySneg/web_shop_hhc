@@ -77,6 +77,27 @@ class Ordering:
         self.order = order
         self.delivery_option = order.delivery_option
 
+    def _get_optional_information(self):
+        pickup_info = ''
+        courier_info = '\n\tDestination address - {region}'.format(region=self.order.destination_region) + \
+                       '{country}, {street}, house №{house}, apartment №{apartment}.'.format(
+                           country=self.order.destination_country, street=self.order.destination_street,
+                           house=self.order.destination_house, apartment=self.order.destination_apartment)
+        delivery_service_info = '\n\tDestination delivery office - {region}'.format(
+            region=self.order.destination_region) + \
+                                '{country}, delivery office №{office}.'.format(
+                                    country=self.order.destination_country,
+                                    office=self.order.destination_delivery_service)
+
+        order_optional_information = {
+            Order.PICKUP: pickup_info,
+            Order.STORE_COURIER: courier_info,
+            Order.DELIVERY_SERVICE_1: delivery_service_info,
+            Order.DELIVERY_SERVICE_2: delivery_service_info,
+            Order.DELIVERY_SERVICE_3: delivery_service_info,
+        }
+        return order_optional_information[self.order.delivery_option]
+
     def __init__(self, order_id):
         self.order_id = order_id
         self._get_delivery_option()
@@ -107,12 +128,29 @@ class Ordering:
                                                                            price=units_price)
             customer_text += text
             admin_text += text
-        customer_text += '\n\nOur manager will contact you shortly.'
-        #TODO: Add admin text for sending email with all data
+        total_price_text = '\n\tTotal price - {total_price} ₴.'.format(total_price=total_price)
+        customer_text += total_price_text + '\n\nOur manager will contact you shortly.'
+        admin_text += total_price_text + \
+                      '\nCustomer information:' + \
+                      '\n\tFull name - {first_name} {middle_name} {last_name};'.format(
+                          first_name=self.order.first_name, middle_name=self.order.middle_name,
+                          last_name=self.order.last_name) + \
+                      '\n\tContacts - {phone};  {email};'.format(phone=self.order.phone_number,
+                                                                  email=self.order.email) + \
+                      '\n\tPayment option - {payment}.'.format(payment=self.order.payment_option) + \
+                      '\n\tDelivery option - {delivery}.'.format(delivery=self.order.delivery_option) + \
+                      self._get_optional_information()
         send_mail(
             subject="Order №{} in Web shop HHC".format(self.order_id),
             message=customer_text,
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[settings.RECIPIENT_ADDRESS]
         )
+        send_mail(
+            subject="Order №{}".format(self.order_id),
+            message=admin_text,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[settings.RECIPIENT_ADDRESS]
+        )
+
         # TODO: Change recipient_list to self.order.email
