@@ -174,7 +174,6 @@ def order_new(request):
         if initiated_order.is_valid():
             bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
             new_order = new_order_updater(initiated_order, request.user, bucket.product_quantity)
-            # TODO: ERROR while ordering by a INKOGNITO user, must fix!!!
             return redirect(order_confirm, order_id=new_order.id)
     context = {'initiated_order_form': OrderFirstCreationForm(), 'active_page': "bucket",
                'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}

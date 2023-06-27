@@ -78,27 +78,6 @@ class Ordering:
         self.order = order
         self.delivery_option = order.delivery_option
 
-    # def _get_optional_information(self):
-    #     pickup_info = ''
-    #     courier_info = '\n\tDestination address - {region}'.format(region=self.order.destination_region) + \
-    #                    '{country}, {street}, house №{house}, apartment №{apartment}.'.format(
-    #                        country=self.order.destination_country, street=self.order.destination_street,
-    #                        house=self.order.destination_house, apartment=self.order.destination_apartment)
-    #     delivery_service_info = '\n\tDestination delivery office - {region}'.format(
-    #         region=self.order.destination_region) + \
-    #                             '{country}, delivery office №{office}.'.format(
-    #                                 country=self.order.destination_country,
-    #                                 office=self.order.destination_delivery_service)
-    #
-    #     order_optional_information = {
-    #         Order.PICKUP: pickup_info,
-    #         Order.STORE_COURIER: courier_info,
-    #         Order.DELIVERY_SERVICE_1: delivery_service_info,
-    #         Order.DELIVERY_SERVICE_2: delivery_service_info,
-    #         Order.DELIVERY_SERVICE_3: delivery_service_info,
-    #     }
-    #     return order_optional_information[self.order.delivery_option]
-
     def __init__(self, order_id):
         self.order_id = order_id
         self._get_delivery_option()
@@ -114,33 +93,6 @@ class Ordering:
         return order_options[self.delivery_option]
 
     def send_order_mail_report(self):
-        # customer_text = 'Thank you, order №{order_id} accepted:'.format(order_id=self.order_id)
-        # admin_text = 'New order №{order_id}:'.format(order_id=self.order_id)
-        # id_quantity = self.order.products['products']
-        # products = Product.objects.filter(id__in=id_quantity)
-        # total_price = 0
-        # for id in id_quantity:
-        #     product = products.get(id=id)
-        #     product_quantity = id_quantity[id]
-        #     units_price = round(product.get_price() * product_quantity, 2)
-        #     total_price += units_price
-        #     text = '\n\t*\t{title} - {quantity} units - {price} ₴.'.format(title=product.title,
-        #                                                                    quantity=product_quantity,
-        #                                                                    price=units_price)
-        #     customer_text += text
-        #     admin_text += text
-        # total_price_text = '\n\tTotal price - {total_price} ₴.'.format(total_price=total_price)
-        # customer_text += total_price_text + '\n\nOur manager will contact you shortly.'
-        # admin_text += total_price_text + \
-        #               '\nCustomer information:' + \
-        #               '\n\tFull name - {first_name} {middle_name} {last_name};'.format(
-        #                   first_name=self.order.first_name, middle_name=self.order.middle_name,
-        #                   last_name=self.order.last_name) + \
-        #               '\n\tContacts - {phone};  {email};'.format(phone=self.order.phone_number,
-        #                                                           email=self.order.email) + \
-        #               '\n\tPayment option - {payment}.'.format(payment=self.order.payment_option) + \
-        #               '\n\tDelivery option - {delivery}.'.format(delivery=self.order.delivery_option) + \
-        #               self._get_optional_information()
         message = OrderMessage(self.order)
         send_mail(
             subject="Order №{} in Web shop HHC".format(self.order_id),
