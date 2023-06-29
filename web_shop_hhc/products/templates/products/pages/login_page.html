@@ -4,19 +4,60 @@
 
 {% block content %}
 <main>
-
-    <form class="px-4 py-3" action="{% url 'login' %}" method="post">
+    <form method="post">
         {% csrf_token %}
-        <div class="mb-3">
-            <label for="phone" class="form-label">Enter your phone number +38:</label>
-            <input type="tel" class="form-control" id="phone" name="phone" placeholder="7771234567"  required>
-        </div>
-        <div class="mb-3">
-            <label for="exampleDropdownFormPassword1" class="form-label">Password</label>
-            <input type="password"  name="password" class="form-control" id="exampleDropdownFormPassword1" placeholder="Password">
-        </div>
-        <button type="submit" class="btn btn-primary">Sign in</button>
+        {{ login_form.as_p }}
+        <button type="submit">login</button>
     </form>
+
+<!--    -->
+<!--    -->
+<!--    <form class="px-4 py-3" action="{% url 'login' %}" method="post">-->
+<!--        {% csrf_token %}-->
+<!--        <div class="mb-3">-->
+<!--            <label for="phone" class="form-label">Enter your phone number +38:</label>-->
+<!--            <input type="tel" class="form-control" id="phone" name="phone" placeholder="7771234567"  required>-->
+<!--        </div>-->
+<!--        <div class="mb-3">-->
+<!--            <label for="exampleDropdownFormPassword1" class="form-label">Password</label>-->
+<!--            <input type="password"  name="password" class="form-control" id="exampleDropdownFormPassword1" placeholder="Password">-->
+<!--        </div>-->
+<!--        <button type="submit" class="btn btn-primary">Sign in</button>-->
+<!--    </form>-->
+
+
+
+<!--    <form class="px-4 py-3" action="{% url 'login' %}" method="post">-->
+<!--        {% csrf_token %}-->
+<!--        <div class="mb-3">-->
+<!--        <label for="exampleInputEmail1" class="form-label">Email address</label>-->
+<!--        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">-->
+<!--        <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>-->
+<!--      </div>-->
+<!--      <div class="mb-3">-->
+<!--        <label for="exampleInputPassword1" class="form-label">Password</label>-->
+<!--        <input type="password" class="form-control" id="exampleInputPassword1">-->
+<!--      </div>-->
+<!--        <button type="submit" class="btn btn-primary">Sign in</button>-->
+<!--    </form>-->
+
+<!--    <form>-->
+<!--      <div class="mb-3">-->
+<!--        <label for="exampleInputEmail1" class="form-label">Email address</label>-->
+<!--        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">-->
+<!--        <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>-->
+<!--      </div>-->
+<!--      <div class="mb-3">-->
+<!--        <label for="exampleInputPassword1" class="form-label">Password</label>-->
+<!--        <input type="password" class="form-control" id="exampleInputPassword1">-->
+<!--      </div>-->
+<!--      <div class="mb-3 form-check">-->
+<!--        <input type="checkbox" class="form-check-input" id="exampleCheck1">-->
+<!--        <label class="form-check-label" for="exampleCheck1">Check me out</label>-->
+<!--      </div>-->
+<!--      <button type="submit" class="btn btn-primary">Submit</button>-->
+<!--    </form>-->
+
     <div class="dropdown-divider"></div>
     <a href="/signup/"><strong>New around here? Sign up</strong></a>
     <a class="dropdown-item" href="#">Forgot password?</a>

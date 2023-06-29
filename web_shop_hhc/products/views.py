@@ -46,19 +46,20 @@ def contacts_page(request):
 def login_page(request):
     context = {'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
     if request.method == "POST":
-        phone_number = request.POST['phone']
-        # TODO: make validator for signs of phone number
-        if len(phone_number) == 10:
-            phone_number = '+38' + phone_number
-        username = Customer.objects.get(phone_number=phone_number).user.username
-        password = request.POST['password']
-        auth_user = authenticate(username=username, password=password)
-        if auth_user:
-            django_login(request, auth_user)
-            return redirect(product_list)
-        else:
-            # TODO: raise error if no user or incorrect password
-            context['error'] = 'User not found!'
+        login_form = CustomerLoginForm(request.POST)
+        if login_form.is_valid():
+            customer = login_form.save(commit=False)
+            username = User.objects.get(email=customer.email)
+            password = customer.password
+            auth_user = authenticate(username=username, password=password)
+            if auth_user:
+                django_login(request, auth_user)
+                return redirect(product_list)
+            else:
+                # TODO: raise error if no user or incorrect password
+                context['error'] = 'User not found!'
+    login_form = CustomerLoginForm()
+    context['login_form'] = login_form
     context['active_page'] = "login_page"
     return render(request, 'products/pages/login_page.html', context)
 
@@ -93,9 +94,8 @@ def signup(request):
             if auth_user:
                 django_login(request, auth_user)
             return redirect(product_list)
-    else:
-        user_form = UserSignupForm()
-        customer_form = CustomerSignupForm()
+    user_form = UserSignupForm()
+    customer_form = CustomerSignupForm()
     return render(request, 'products/pages/signup_page.html', {
         'user_form': user_form,
         'customer_form': customer_form,

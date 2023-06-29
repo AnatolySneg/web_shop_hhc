@@ -1,6 +1,6 @@
 from ..models import UserBucketProducts, Order, Product
 from ..forms import OrderSecondPickupCreationForm, OrderSecondCourierCreationForm, OrderSecondDeliveryCreationForm
-from .message import OrderMessage
+from .text_message import OrderMessage
 from django.core.mail import send_mail
 from django.conf import settings
 

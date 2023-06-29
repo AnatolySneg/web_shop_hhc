@@ -1,6 +1,7 @@
 from django.forms import PasswordInput, ModelForm, CharField, EmailField, RadioSelect
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
+from django import forms
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ValidationError
 from .models import Customer, Order
 
@@ -19,11 +20,8 @@ class UserSignupForm(UserCreationForm):
     def clean(self):
         cleaned_data = super().clean()
         email = cleaned_data.get("email")
-        print("email", email)
         is_db_email = User.objects.filter(email=email).exists()
-        print("is_db_email", is_db_email)
         if is_db_email:
-            print("ValidationError")
             raise ValidationError("Email exist")
 
 
@@ -31,6 +29,14 @@ class CustomerSignupForm(ModelForm):
     class Meta:
         model = Customer
         fields = ['phone_number']
+
+
+class CustomerLoginForm(ModelForm):
+    class Meta:
+        model = User
+        fields = ['email', 'password']
+        widgets = {'password': PasswordInput(),
+                   }
 
 
 class OrderFirstCreationForm(ModelForm):
