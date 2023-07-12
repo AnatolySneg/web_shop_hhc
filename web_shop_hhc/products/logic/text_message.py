@@ -14,6 +14,8 @@ def email_sender(subject, message, recipient_list=[settings.RECIPIENT_ADDRESS]):
     )
 
 
+# TODO: Change recipient_list to self.order.email
+
 class OrderEmail:
     def _get_optional_information(self):
         pickup_info = ''
@@ -89,23 +91,6 @@ class OrderEmail:
     def _order_admin_email_subject(self):
         return "Order №{}".format(self.order_info.id)
 
-    # def _sending_order_email(self):
-    #     send_mail(
-    #         subject=self.customer_email_subject,
-    #         message=self.customer_email_text,
-    #         from_email=settings.EMAIL_HOST_USER,
-    #         recipient_list=[settings.RECIPIENT_ADDRESS]
-    #     )
-    #
-    #     send_mail(
-    #         subject=self.admin_email_subject,
-    #         message=self.admin_email_text,
-    #         from_email=settings.EMAIL_HOST_USER,
-    #         recipient_list=[settings.RECIPIENT_ADDRESS]
-    #     )
-
-    # TODO: Change recipient_list to self.order.email
-
     def __init__(self, order_info):
         self.order_info = order_info
         email_text = self._order_report_text()
@@ -131,14 +116,14 @@ class RessetPasswordMail:
             first_link_part += symbol
             if count == 3:
                 break
-
+        # TODO: Refactor above row constructor in another way!
         middle_link_part = 'reset_token/'
 
         last_link_part = (
             ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for _ in range(30)))
         secret_string_saver(last_link_part, self.customer_id)
 
-        reset_link = first_link_part + last_link_part
+        reset_link = first_link_part + middle_link_part + last_link_part
         return reset_link
 
     def _text_reset_password(self):
