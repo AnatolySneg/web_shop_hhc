@@ -4,8 +4,8 @@ from django.contrib.auth import authenticate, login as django_login, logout as d
 from .forms import *
 from django.views.decorators.http import require_GET, require_http_methods
 from .logic.products import Bucket, Ordering
-from django.core.mail import send_mail
-from django.conf import settings
+from .logic.text_message import RessetPasswordMail
+from .logic.customers import PasswordReset
 
 
 # from django.views.decorators.csrf import csrf_exempt
@@ -37,6 +37,7 @@ def product_detail(request, product_id):
 def contacts_page(request):
     context = {'active_page': "contacts_page",
                'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
+    path = request.build_absolute_uri()
     test_string = "This string was rendered from views.contacts_page()"
     context['test_string'] = test_string
     return render(request, 'products/pages/about_us.html', context)
@@ -68,6 +69,52 @@ def login_page(request):
 def logout(request):
     django_logout(request)
     return redirect(request.META.get('HTTP_REFERER'))
+
+
+@require_http_methods(["GET", "POST"])
+def forgot_password_page(request):
+    context = {'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
+    if request.method == "POST":
+        email_form = CustomerEmailForm(request.POST)
+        if email_form.is_valid():
+            customer_email = email_form.save(commit=False)
+            customer = User.objects.get(email=customer_email.email)
+            if customer:
+                return redirect(get_reset_password_link, customer_id=customer.id)
+            # TODO: change redirect function
+
+    email_form = CustomerEmailForm()
+    context['email_form'] = email_form
+    context['active_page'] = "login_page"
+    return render(request, 'products/pages/forgot_password.html', context)
+
+
+@require_GET
+def get_reset_password_link(request, customer_id):
+    context = {'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
+    path = request.build_absolute_uri()
+    instance = RessetPasswordMail(customer_id=customer_id, path=path)
+    email = instance.customer.email
+    context['email'] = email
+    return render(request, 'products/pages/reset_instructions.html', context)
+
+
+@require_http_methods(["GET", "POST"])
+def reset_password(request, secret_string):
+    context = {'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
+    context['active_page'] = "login_page"
+    pas = PasswordReset(secret_string=secret_string)
+    if not pas.secret_is_valid:
+        return redirect(product_list)
+    if request.method == "POST":
+        password_form = ResetPassword(data=request.POST, user=pas.user_reset_password)
+        if password_form.is_valid():
+            password_form.save()
+            return render(request, 'products/pages/password_reset_success.html', context)
+
+    password_form = ResetPassword(user=pas.user_reset_password)
+    context['password_form'] = password_form
+    return render(request, 'products/pages/reset_password_form.html', context)
 
 
 @require_GET
@@ -198,6 +245,7 @@ def order_confirm(request, order_id):
 
 @require_GET
 def order_page(request, confirm_order_id):
+    # TODO: Take all object(order), not only id to minimise db call!!!
     bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
     bucket.clear()
     confirmed_order = Ordering(confirm_order_id)

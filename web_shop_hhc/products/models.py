@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import User
@@ -104,6 +106,23 @@ class Comments(models.Model):
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone_number = PhoneNumberField(unique=True, region="UA")
+
+
+class SecretString(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True)
+    secret_string = models.CharField(max_length=50)
+    creation_time = models.DateTimeField(auto_now=True)
+
+
+def secret_string_saver(secret_string, user_id):
+    secret = SecretString(user_id=user_id, secret_string=secret_string)
+    try:
+        secret.save()
+    except Exception:
+        secret_raw = SecretString.objects.get(user_id=user_id)
+        secret_raw.secret_string = secret_string
+        secret_raw.creation_time = datetime.datetime.now()
+        secret_raw.save()
 
 
 class UserBucketProducts(models.Model):

@@ -1,7 +1,7 @@
 from django.forms import PasswordInput, ModelForm, CharField, EmailField, RadioSelect
 from django.contrib.auth.models import User
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetPasswordForm
 from django.core.exceptions import ValidationError
 from .models import Customer, Order
 
@@ -36,6 +36,21 @@ class CustomerLoginForm(ModelForm):
         model = User
         fields = ['email', 'password']
         widgets = {'password': PasswordInput(),
+                   }
+
+
+class CustomerEmailForm(ModelForm):
+    class Meta:
+        model = User
+        fields = ['email']
+
+
+class ResetPassword(SetPasswordForm):
+    class Meta:
+        model = User
+        fields = ['new_password1, new_password2']
+        widgets = {'new_password1': PasswordInput(),
+                   'new_password2': PasswordInput(),
                    }
 
 

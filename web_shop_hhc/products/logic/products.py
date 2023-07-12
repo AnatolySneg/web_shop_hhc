@@ -1,8 +1,6 @@
 from ..models import UserBucketProducts, Order, Product
 from ..forms import OrderSecondPickupCreationForm, OrderSecondCourierCreationForm, OrderSecondDeliveryCreationForm
-from .text_message import OrderMessage
-from django.core.mail import send_mail
-from django.conf import settings
+from .text_message import OrderEmail
 
 
 class Bucket:
@@ -93,18 +91,4 @@ class Ordering:
         return order_options[self.delivery_option]
 
     def send_order_mail_report(self):
-        message = OrderMessage(self.order)
-        send_mail(
-            subject="Order №{} in Web shop HHC".format(self.order_id),
-            message=message.customer_email_text,
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[settings.RECIPIENT_ADDRESS]
-        )
-        send_mail(
-            subject="Order №{}".format(self.order_id),
-            message=message.admin_email_text,
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[settings.RECIPIENT_ADDRESS]
-        )
-
-        # TODO: Change recipient_list to self.order.email
+        OrderEmail(self.order)
