@@ -108,27 +108,22 @@ class RessetPasswordMail:
         return customer
 
     def _get_reset_link(self):
-        count = 0
+        split_url = self.path.split('/')
         first_link_part = ''
-        for symbol in self.path:
-            if symbol == '/':
-                count += 1
-            first_link_part += symbol
-            if count == 3:
-                break
-        # TODO: Refactor above row constructor in another way!
-        middle_link_part = 'reset_token/'
+        for item in split_url[:3]:
+            first_link_part += item + '/'
+        first_link_part += 'reset_token/'
 
         last_link_part = (
             ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for _ in range(30)))
         secret_string_saver(last_link_part, self.customer_id)
 
-        reset_link = first_link_part + middle_link_part + last_link_part
+        reset_link = first_link_part + last_link_part
         return reset_link
 
     def _text_reset_password(self):
         text = "\tYou get this message for changing password in your account on Web-shop HHS." + \
-               "\n\tFor changing password, click on the link below:" + \
+               "\n\tFor changing password, click on the URL below:" + \
                "\n\n\t {link} ".format(link=self.reset_link) + \
                "\n\n\tIf it was not you, ignore this massage"
         return text

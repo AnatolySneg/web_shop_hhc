@@ -5,6 +5,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import User
 from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
+from django.db.utils import IntegrityError
 
 
 class Category(models.Model):
@@ -27,9 +28,10 @@ class Product(models.Model):
     description = models.TextField(max_length=1000)
     price = models.FloatField()
     is_sale = models.BooleanField(default=False)
-    discount = models.IntegerField(blank=True, null=True)
+    discount = models.PositiveIntegerField(blank=True, null=True)
     # TODO: Make positive integer field
-    available_quantity = models.IntegerField(default=0)
+    available_quantity = models.PositiveIntegerField(default=0)
+    # TODO: with pre_save function make calculation of quantity
     type = models.ForeignKey(Type, default=None, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -94,10 +96,10 @@ class Image(models.Model):
 class Comments(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     rate = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], blank=True)
-    author = models.CharField(default='DefaultAUTHOR', max_length=100)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     published_date = models.DateTimeField(auto_now_add=True)
     # TODO: Change to Author from users model, when created!!!!!!!!
-    comment = models.TextField(blank=True, max_length=1000)  # Comments should be approved by moderator !!!!
+    comment = models.TextField(blank=True, null=True,max_length=1000)
 
 
 # TODO: ADD USERS, COMMENTS, purchase history, product rating!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -118,7 +120,7 @@ def secret_string_saver(secret_string, user_id):
     secret = SecretString(user_id=user_id, secret_string=secret_string)
     try:
         secret.save()
-    except Exception:
+    except IntegrityError:
         secret_raw = SecretString.objects.get(user_id=user_id)
         secret_raw.secret_string = secret_string
         secret_raw.creation_time = datetime.datetime.now()

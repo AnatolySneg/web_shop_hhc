@@ -1,12 +1,9 @@
-from django.forms import PasswordInput, ModelForm, CharField, EmailField, RadioSelect
+from django.forms import PasswordInput, ModelForm, CharField, RadioSelect
 from django.contrib.auth.models import User
-from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetPasswordForm
+
+from django.contrib.auth.forms import UserCreationForm, SetPasswordForm
 from django.core.exceptions import ValidationError
 from .models import Customer, Order
-
-
-# TODO: ride https://docs.djangoproject.com/en/3.2/topics/forms/modelforms/#the-save-method for extending forms!!!!
 
 
 class UserSignupForm(UserCreationForm):

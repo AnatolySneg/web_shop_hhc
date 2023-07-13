@@ -7,15 +7,20 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('', product_list),
     path('about_us/', contacts_page),
+    path('product_detail/<int:product_id>/', product_detail),
+]
+
+user_urls = [
+    path('signup/', signup),
     path('login/', login_page, name='login'),
+    path('logout/', logout),
     path('forgot_password/', forgot_password_page),
     path('get_reset_password_link/<int:customer_id>', get_reset_password_link),
     path('reset_token/<str:secret_string>/', reset_password),
-    path('signup/', signup),
-    path('logout/', logout),
     path('user/', user_page),
-    path('product_detail/<int:product_id>/', product_detail),
 ]
+
+urlpatterns += user_urls
 
 bucket_urls = [
     path('bucket/', bucket_page),
@@ -33,7 +38,6 @@ order_urls = [
     path('order/<int:order_id>', order_confirm),
     path('order_page/<int:confirm_order_id>', order_page),
 ]
-
 
 urlpatterns += order_urls
 

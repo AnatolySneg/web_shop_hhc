@@ -31,7 +31,7 @@ class Bucket:
         if self.user_id:
             self._update_user_bucket()
 
-    # TODO: refactor of data type, for saving products in bucket.
+    #TODO: refactor of data type, for saving products in bucket.
     """
     user_id - incoming integer data-type, if user is authenticate, or None type if else.
     session_products_ids - incoming list data-type, if bucket was updated at least once for current session, 
