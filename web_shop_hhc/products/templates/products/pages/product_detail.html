@@ -18,6 +18,24 @@
             {% endif %}
 
     {% endfor %}
+    <a>
+        <h6>Rating: {{ product.average_rating }}/5</h6>
+    </a>
+    <a>
+    {% if request.user.is_authenticated %}
+        <form action="set_rating/">
+            <select name="rate" id="">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+            <button>Set rating</button>
+        </form>
+    {% endif %}
+    </a>
+    <hr>
     <a href="/add_to_bucket/{{ product.id }}" class="btn btn-success">Add to bucket</a>
     <hr>
     <p>{{ product.description }}</p>

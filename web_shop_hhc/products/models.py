@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
 from django.db.utils import IntegrityError
+from django.db.models import Avg
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class Category(models.Model):
@@ -29,7 +31,6 @@ class Product(models.Model):
     price = models.FloatField()
     is_sale = models.BooleanField(default=False)
     discount = models.PositiveIntegerField(blank=True, null=True)
-    # TODO: Make positive integer field
     available_quantity = models.PositiveIntegerField(default=0)
     # TODO: with pre_save function make calculation of quantity
     type = models.ForeignKey(Type, default=None, on_delete=models.CASCADE)
@@ -47,6 +48,13 @@ class Product(models.Model):
         if self.is_sale:
             return self.price * (100 - self.discount) / 100
         return self.price
+
+    def average_rating(self):
+        product_rating = Rating.objects.filter(product=self)
+        return product_rating.aggregate(Avg('rate'))['rate__avg'] or 0
+
+    def get_comments(self):
+        return Comments.objects.filter(product=self)
 
 
 """
@@ -95,14 +103,27 @@ class Image(models.Model):
 
 class Comments(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    rate = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], blank=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     published_date = models.DateTimeField(auto_now_add=True)
-    # TODO: Change to Author from users model, when created!!!!!!!!
-    comment = models.TextField(blank=True, null=True,max_length=1000)
+    comment = models.TextField(blank=True, null=True, max_length=1000)
+
+
+class Rating(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    rate = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], blank=True, null=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 # TODO: ADD USERS, COMMENTS, purchase history, product rating!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+def rate_updater(product_id, user_id, rate_value):
+    try:
+        rating = Rating.objects.get(product_id=product_id, author_id=user_id)
+        rating.rate = rate_value
+        rating.save()
+    except ObjectDoesNotExist:
+        rating = Rating.objects.create(product_id=product_id, rate=rate_value, author_id=user_id)
+        rating.save()
 
 
 class Customer(models.Model):

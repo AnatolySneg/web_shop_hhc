@@ -18,6 +18,7 @@ def product_list(request):
                'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
     # TODO: Fielters and Sorting products !!!!
     context['products'] = Product.objects.all()
+    # context['rating'] = Rating.objects.all()
     return render(request, 'products/pages/home_page.html', context)
 
 
@@ -31,6 +32,14 @@ def product_detail(request, product_id):
     context['product'] = product
     context['images'] = images
     return render(request, 'products/pages/product_detail.html', context)
+
+
+@require_GET
+def set_rating(request, product_id):
+    rate_value = int(request.GET['rate'])
+    user_id = request.user.id
+    rate_updater(product_id=product_id, user_id=user_id, rate_value=rate_value)
+    return redirect(product_detail, product_id=product_id)
 
 
 @require_GET

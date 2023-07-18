@@ -1,4 +1,4 @@
-from ..models import SecretString, User
+from ..models import SecretString
 from datetime import datetime, timezone
 
 

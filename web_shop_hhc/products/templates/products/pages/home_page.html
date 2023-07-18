@@ -38,17 +38,16 @@
                         <div class="col-lg-4 col-md-2 nb-3">
                             <div class="card">
                                 <div class="view overlay">
-                                    {% for img in product.get_images %}
-                                        {% if img.title_image %}
-                                            <div class="image">
-                                                <img src={{img.image.url}} width="150">
-                                            </div>
-                                        {% endif %}
-                                    {% endfor %}
+                                    <div class="image">
+                                        <img src={{product.get_title_image.image.url}} width="150">
+                                    </div>
                                 </div>
                                 <div class="card-body text-center">
                                     <a href="/product_detail/{{ product.id }}" class="grey-text">
                                         <h6>{{ product.title }}</h6>
+                                    </a>
+                                    <a>
+                                        <h6>{{ product.average_rating }}/5</h6>
                                     </a>
                                     {% if product.is_sale %}
                                         <h6>

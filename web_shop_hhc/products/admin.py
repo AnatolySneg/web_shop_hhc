@@ -9,8 +9,13 @@ class ImageInline(admin.StackedInline):
     extra = 5
 
 
+class RatingInline(admin.StackedInline):
+    model = Rating
+    extra = 5
+
+
 class ProductAdmin(admin.ModelAdmin):
-    inlines = [ImageInline]
+    inlines = [ImageInline, RatingInline]
     list_display = ['id', 'title', 'available_quantity', 'price', 'is_sale', 'discount', ]
 
 
@@ -37,4 +42,5 @@ admin.site.register(Product, ProductAdmin)
 admin.site.register(Category)
 admin.site.register(Type)
 admin.site.register(Image)
+admin.site.register(Rating)
 admin.site.register(Comments)
