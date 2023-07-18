@@ -9,6 +9,7 @@ urlpatterns = [
     path('about_us/', contacts_page),
     path('product_detail/<int:product_id>/', product_detail),
     path('product_detail/<int:product_id>/set_rating/', set_rating),
+    path('product_detail/<int:product_id>/leave_a_comment/', leave_a_comment),
 ]
 
 user_urls = [

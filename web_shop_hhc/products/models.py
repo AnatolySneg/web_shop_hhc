@@ -54,7 +54,7 @@ class Product(models.Model):
         return product_rating.aggregate(Avg('rate'))['rate__avg'] or 0
 
     def get_comments(self):
-        return Comments.objects.filter(product=self)
+        return Comments.objects.filter(product=self).order_by('-published_date')
 
 
 """
@@ -108,6 +108,11 @@ class Comments(models.Model):
     comment = models.TextField(blank=True, null=True, max_length=1000)
 
 
+def comment_saver(product_id, user_id, comment):
+    comment = Comments.objects.create(product_id=product_id, author_id=user_id, comment=comment)
+    comment.save()
+
+
 class Rating(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     rate = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], blank=True, null=True)
@@ -117,13 +122,9 @@ class Rating(models.Model):
 # TODO: ADD USERS, COMMENTS, purchase history, product rating!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 def rate_updater(product_id, user_id, rate_value):
-    try:
-        rating = Rating.objects.get(product_id=product_id, author_id=user_id)
-        rating.rate = rate_value
-        rating.save()
-    except ObjectDoesNotExist:
-        rating = Rating.objects.create(product_id=product_id, rate=rate_value, author_id=user_id)
-        rating.save()
+    rating, created = Rating.objects.get_or_create(product_id=product_id, author_id=user_id)
+    rating.rate = rate_value
+    rating.save()
 
 
 class Customer(models.Model):

@@ -43,6 +43,14 @@ def set_rating(request, product_id):
 
 
 @require_GET
+def leave_a_comment(request, product_id):
+    comment = request.GET['comment']
+    user_id = request.user.id
+    comment_saver(product_id=product_id, user_id=user_id, comment=comment)
+    return redirect(product_detail, product_id=product_id)
+
+
+@require_GET
 def contacts_page(request):
     context = {'active_page': "contacts_page",
                'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
