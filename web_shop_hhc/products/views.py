@@ -6,6 +6,8 @@ from django.views.decorators.http import require_GET, require_http_methods
 from .logic.products import Bucket, Ordering
 from .logic.text_message import RessetPasswordMail
 from .logic.customers import PasswordReset
+from .logic.list_products import ProductListing
+from django.utils.datastructures import MultiValueDictKeyError
 
 
 # from django.views.decorators.csrf import csrf_exempt
@@ -13,12 +15,22 @@ from .logic.customers import PasswordReset
 
 # @csrf_exempt
 @require_GET
-def product_list(request):
+def product_list(request, category_id=None, type_id=None, product_filtering=None, product_sorting=None,
+                 search=None):
     context = {'active_page': "home_page",
                'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
     # TODO: Fielters and Sorting products !!!!
-    context['products'] = Product.objects.all()
-    # context['rating'] = Rating.objects.all()
+    try:
+        search = request.GET['search']
+    except MultiValueDictKeyError:
+        pass
+    products = ProductListing(category_id=category_id, type_id=type_id, product_filtering=product_filtering,
+                              product_sorting=product_sorting,
+                              search=search)
+    context['products'] = products.product_list_available
+    context['out_of_stock'] = products.product_list_unavailable
+    context["categorys"] = Category.objects.all()
+    context["types"] = Type.objects.all()
     return render(request, 'products/pages/home_page.html', context)
 
 

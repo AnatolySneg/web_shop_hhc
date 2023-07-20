@@ -14,6 +14,14 @@ class RatingInline(admin.StackedInline):
     extra = 5
 
 
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ['name', 'id']
+
+
+class TypeAdmin(admin.ModelAdmin):
+    list_display = ['name', 'id']
+
+
 class ProductAdmin(admin.ModelAdmin):
     inlines = [ImageInline, RatingInline]
     list_display = ['id', 'title', 'available_quantity', 'price', 'is_sale', 'discount', ]
@@ -39,8 +47,8 @@ admin.site.register(Order)
 admin.site.register(UserBucketProducts)
 admin.site.register(Product, ProductAdmin)
 # admin.site.register(UserBucketProducts, UserBucketProductsAdmin)
-admin.site.register(Category)
-admin.site.register(Type)
+admin.site.register(Category, CategoryAdmin)
+admin.site.register(Type, TypeAdmin)
 admin.site.register(Image)
 admin.site.register(Rating)
 admin.site.register(Comments)

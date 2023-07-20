@@ -2,26 +2,38 @@
 
 {% block content %}
 <main>
-    <h3>Фильтры</h3>
-
-
     <div class="container">
 
 
       <div class="row">
         <div class="col-3">
-            <p>Groups * * * * * * * * * * * * * * * * * * * * * * * * * * *</p>
-            <p>Groups * * * * * * * * * * * * * * * * * * * * * * * * * * *</p>
-            <p>Groups * * * * * * * * * * * * * * * * * * * * * * * * * * *</p>
-            <p>Groups * * * * * * * * * * * * * * * * * * * * * * * * * * *</p>
-            <p>Groups * * * * * * * * * * * * * * * * * * * * * * * * * * *</p>
 
+            <div class="accordion" id="accordionPanelsStayOpenExample">
+              {% for category in categorys %}
+                <div class="accordion-item">
+                <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                      <a href="/category_product_list/{{ category.id }}"><strong><h4>{{ category.name }}</h4></strong></a>
+                  </button>
+                </h2>
+                <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+                  {% for type in category.get_type %}
+                      <div class="accordion-body">
+                        <a href="/type_product_list/{{ type.id }}"><h6>{{ type.name }}</h6></a>
+                      </div>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
         </div>
+
+
         <div class="col-9">
 
             <div style="height: 50px;">
-                <form class="d-flex" role="search">
-                  <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <form class="d-flex" role="search" action="/search_product_list/">
+                  <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search">
                   <button class="btn btn-outline-secondary" type="submit">Search</button>
                 </form>
             </div>
@@ -35,6 +47,51 @@
             <section class="text-center mb-4">
                 <div class="row wow fadeIn">
                     {% for product in products %}
+                        <div class="col-lg-4 col-md-2 nb-3">
+                            <div class="card">
+                                <div class="view overlay">
+                                    <div class="image">
+                                        <img src={{product.get_title_image.image.url}} width="150">
+                                    </div>
+                                </div>
+                                <div class="card-body text-center">
+                                    <a href="/product_detail/{{ product.id }}" class="grey-text">
+                                        <h6>{{ product.title }}</h6>
+                                    </a>
+                                    <a>
+                                        <h6>{{ product.average_rating }}/5</h6>
+                                    </a>
+                                    {% if product.is_sale %}
+                                        <h6>
+                                            <strike>
+                                                {{ product.price }} ₴
+                                            </strike>
+                                        </h6>
+                                    {% endif %}
+                                    <h6>
+                                        <strong>
+                                            <a href="#" class="dark-grey-text">{{ product.get_price }} ₴</a>
+                                        </strong>
+                                    </h6>
+                                    <h6 class="font-weight-bold blue-text">
+                                        <strong>
+                                            Кнопка добавить в корзину и быстрый заказ
+                                        </strong>
+                                    </h6>
+                                        <a href="/add_to_bucket/{{ product.id }}" class="btn btn-success">Add to bucket</a>
+                                    <hr>
+                                    <h6 class="font-weight-bold blue-text">
+                                        <strong>
+                                            Добавить звездный рейтинг
+                                        </strong>
+                                    </h6>
+                                    <a> Добавить количество что добавляется в корзину</a>
+                                    <a> Информация о наличии</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    {% for product in out_of_stock %}
                         <div class="col-lg-4 col-md-2 nb-3">
                             <div class="card">
                                 <div class="view overlay">

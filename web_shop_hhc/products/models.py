@@ -7,7 +7,6 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
 from django.db.utils import IntegrityError
 from django.db.models import Avg
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class Category(models.Model):
@@ -16,6 +15,9 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    def get_type(self):
+        return Type.objects.filter(category=self)
+
 
 class Type(models.Model):
     name = models.CharField(max_length=100)
@@ -23,6 +25,9 @@ class Type(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_products(self):
+        return Product.objects.filter(type=self)
 
 
 class Product(models.Model):
