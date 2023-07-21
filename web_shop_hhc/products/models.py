@@ -54,6 +54,14 @@ class Product(models.Model):
             return self.price * (100 - self.discount) / 100
         return self.price
 
+    def get_available_status(self):
+        if self.available_quantity <= 0:
+            return "not_in_stock"
+        elif 0 < self.available_quantity <= 10:
+            return "running_out"
+        else:
+            return "in_stock"
+
     def average_rating(self):
         product_rating = Rating.objects.filter(product=self)
         return product_rating.aggregate(Avg('rate'))['rate__avg'] or 0

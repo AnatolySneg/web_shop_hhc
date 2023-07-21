@@ -15,7 +15,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 
 # @csrf_exempt
 @require_GET
-def product_list(request, category_id=None, type_id=None, product_filtering=None, product_sorting=None,
+def product_list(request, category_id=None, type_id=None, product_filtering=None, product_sorting='rating',
                  search=None):
     context = {'active_page': "home_page",
                'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
@@ -24,11 +24,19 @@ def product_list(request, category_id=None, type_id=None, product_filtering=None
         search = request.GET['search']
     except MultiValueDictKeyError:
         pass
+
+    try:
+        product_sorting = request.GET['sorting']
+    except MultiValueDictKeyError:
+        pass
+
     products = ProductListing(category_id=category_id, type_id=type_id, product_filtering=product_filtering,
                               product_sorting=product_sorting,
                               search=search)
-    context['products'] = products.product_list_available
-    context['out_of_stock'] = products.product_list_unavailable
+    context['products'] = products.sorted_product_list_available
+    context['out_of_stock'] = products.sorted_product_list_unavailable
+    context['selected_sorting_option'] = product_sorting
+    context['sorting_options'] = products.sorting_option.keys()
     context["categorys"] = Category.objects.all()
     context["types"] = Type.objects.all()
     return render(request, 'products/pages/home_page.html', context)
