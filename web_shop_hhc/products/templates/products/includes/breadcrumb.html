@@ -1,7 +1,17 @@
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="#">Home</a></li>
-    <li class="breadcrumb-item"><a href="#">Library</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Data</li>
+    <li class="breadcrumb-item"><a href="/">All</a></li>
+    {% if category %}
+      <li class="breadcrumb-item active" aria-current="page">{{ category.name }}</li>
+    {% endif %}
+    {% if type %}
+      <li class="breadcrumb-item"><a href="/category_product_list/{{ type.category.id }}">{{ type.category.name }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ type.name }}</li>
+    {% endif %}
+    {% if product %}
+      <li class="breadcrumb-item"><a href="/category_product_list/{{ product.type.category.id }}">{{ product.type.category.name }}</a></li>
+      <li class="breadcrumb-item"><a href="/type_product_list/{{ product.type.id }}">{{ product.type.name }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ product.title }}</li>
+    {% endif %}
   </ol>
 </nav>

@@ -19,26 +19,38 @@ def product_list(request, category_id=None, type_id=None, product_filtering=None
                  search=None):
     context = {'active_page': "home_page",
                'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
-    # TODO: Fielters and Sorting products !!!!
-    try:
-        search = request.GET['search']
-    except MultiValueDictKeyError:
-        pass
+    category_obj = None
+    if category_id:
+        category_obj = Category.objects.get(id=category_id)
+    context["category"] = category_obj
 
-    try:
-        product_sorting = request.GET['sorting']
-    except MultiValueDictKeyError:
-        pass
+    type_obj = None
+    if type_id:
+        type_obj = Type.objects.get(id=type_id)
+    context["type"] = type_obj
+
+    search_value = request.GET.get('search')
+    product_sorting_value = request.GET.get('sorting')
+
+    if product_sorting_value:
+        product_sorting = product_sorting_value
+
+    if search_value:
+        search = search_value
 
     products = ProductListing(category_id=category_id, type_id=type_id, product_filtering=product_filtering,
                               product_sorting=product_sorting,
                               search=search)
     context['products'] = products.sorted_product_list_available
     context['out_of_stock'] = products.sorted_product_list_unavailable
-    context['selected_sorting_option'] = product_sorting
+    context['search'] = search
+
     context['sorting_options'] = products.sorting_option.keys()
+    context['selected_sorting_option'] = product_sorting
     context["categorys"] = Category.objects.all()
-    context["types"] = Type.objects.all()
+    # context["types"] = Type.objects.all()
+
+
     return render(request, 'products/pages/home_page.html', context)
 
 
@@ -56,9 +68,12 @@ def product_detail(request, product_id):
 
 @require_GET
 def set_rating(request, product_id):
-    rate_value = int(request.GET['rate'])
-    user_id = request.user.id
-    rate_updater(product_id=product_id, user_id=user_id, rate_value=rate_value)
+    try:
+        rate_value = int(request.GET['rate'])
+        user_id = request.user.id
+        rate_updater(product_id=product_id, user_id=user_id, rate_value=rate_value)
+    except MultiValueDictKeyError:
+        pass
     return redirect(product_detail, product_id=product_id)
 
 
@@ -158,6 +173,7 @@ def reset_password(request, secret_string):
 def user_page(request):
     context = {'active_page': "user_page"}
     context['test_string'] = "USER PAGE"
+    #TODO: make history of previous orders
     return render(request, 'products/pages/user_page.html', context)
 
 
@@ -200,6 +216,8 @@ def bucket_page(request):
     request.session['products'] = bucket.product_ids
     context['bucket_products'] = bucket_products
     context['product_quantity'] = bucket.product_quantity
+    context['product_price'] = bucket.product_quantity_price
+    context['total_price'] = bucket.product_quantity_total_price
     return render(request, 'products/pages/bucket_page.html', context)
 
 
@@ -208,6 +226,7 @@ def add_to_bucket(request, product_id):
     if request.META.get('HTTP_REFERER'):
         bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
         bucket.add_product(product_id)
+        #TODO: check product quantity befor add to bucket.
         request.session['products'] = bucket.product_ids
         request.session['products_for_order'] = bucket.product_quantity
         return redirect(request.META.get('HTTP_REFERER'))

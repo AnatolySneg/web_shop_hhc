@@ -236,6 +236,23 @@ class Order(models.Model):
                                                                              self.first_name, self.last_name,
                                                                              self.delivery_option)
 
+    def save(self, *args, **kwargs):
+        if self.status == self.REJECT:
+            product_db_quantity_updater(product_quantity=self.products['products'], rejected_order=True)
+        super(Order, self).save(*args, **kwargs)
+
+
+def product_db_quantity_updater(product_quantity, rejected_order=False):
+    products = Product.objects.filter(id__in=product_quantity)
+    if not rejected_order:
+        for product in products:
+            product.available_quantity -= product_quantity[str(product.id)]
+            product.save()
+    else:
+        for product in products:
+            product.available_quantity += product_quantity[str(product.id)]
+            product.save()
+
 
 def new_order_updater(initiated_order, user, product_quantity):
     new_order = initiated_order.save(commit=False)
@@ -253,4 +270,5 @@ def confirm_order_updater(order_form):
     confirm_order.status = Order.CONFIRM
     confirm_order.order_date = timezone.now()
     confirm_order.save()
+    product_db_quantity_updater(confirm_order.products['products'])
     return confirm_order

@@ -11,11 +11,31 @@ class Bucket:
         except UserBucketProducts.DoesNotExist:
             self.product_ids = []
 
+    def _get_product_prices(self, product_id, price):
+        self.product_quantity_price[product_id] = price
+
+    def _correction_available_ids(self, product_id, available):
+        while self.product_ids.count(product_id) != available:
+            self.product_ids.remove(product_id)
+
     def _quantity(self):
         product_quantity = {}
+        available_product_quantity = {}
         for id_number in self.product_ids:
             product_quantity[id_number] = self.product_ids.count(id_number)
-        return product_quantity
+        for id_value in product_quantity:
+            product = Product.objects.get(id=id_value)
+            available_quantity = product.available_quantity
+            self._get_product_prices(product_id=id_value, price=product.get_price())
+            if 0 < available_quantity < product_quantity[id_value]:
+                available_product_quantity[id_value] = available_quantity
+                self._correction_available_ids(product_id=id_value, available=available_quantity)
+            elif 0 >= available_quantity:
+                self._correction_available_ids(product_id=id_value, available=0)
+            else:
+                available_product_quantity[id_value] = product_quantity[id_value]
+
+        return available_product_quantity
 
     def _update_user_bucket(self):
         try:
@@ -31,9 +51,15 @@ class Bucket:
         if self.user_id:
             self._update_user_bucket()
 
-    #TODO: refactor of data type, for saving products in bucket.
+    def _get_total_price(self):
+        total_price = 0
+        for product_id in self.product_quantity:
+            total_price += self.product_quantity_price[product_id] * self.product_quantity[product_id]
+        return total_price
+
+    # TODO: refactor of data type, for saving products in bucket.
     """
-    user_id - incoming integer data-type, if user is authenticate, or None type if else.
+    user_id - incoming integer data-type, if user is authenticate, or user=None type if else.
     session_products_ids - incoming list data-type, if bucket was updated at least once for current session, 
     or None type if else.
     """
@@ -44,7 +70,9 @@ class Bucket:
             self._get_product_ids(self.user_id)
         else:
             self.product_ids = session_products_ids or []
+        self.product_quantity_price = {}
         self.product_quantity = self._quantity()
+        self.product_quantity_total_price = self._get_total_price()
 
     def add_product(self, product_id):
         self.product_ids.append(product_id)
@@ -74,11 +102,11 @@ class Ordering:
     def _get_delivery_option(self):
         order = Order.objects.get(id=self.order_id)
         self.order = order
-        self.delivery_option = order.delivery_option
+        return order.delivery_option
 
     def __init__(self, order_id):
         self.order_id = order_id
-        self._get_delivery_option()
+        self.delivery_option = self._get_delivery_option()
 
     def get_optional_form(self):
         order_options = {

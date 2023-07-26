@@ -30,20 +30,35 @@
                     </div>
                   </th>
                   <td>{{ product.title }}</td>
-                  <td>{{ product.price }} ₴</td>
+                  <td>{{ product.get_price }} ₴</td>
                   <td>
-                      <a href="/less_to_bucket/{{ product.id }}"><strong><</strong></a>
                       {% for prod, quan in product_quantity.items %}
                         {% if prod == product.id %}
+                            <a href="/less_to_bucket/{{ product.id }}"><strong><</strong></a>
                             {{ quan }}
+                            {% if product.available_quantity > quan %}
+                                <a href="/more_to_bucket/{{ product.id }}"><strong>></strong></a>
+                            {% endif %}
                         {% endif %}
                       {% endfor %}
-                      <a href="/more_to_bucket/{{ product.id }}"><strong>></strong></a>
+
                   </td>
                   <td><a href="/remove_from_bucket/{{ product.id }}" class="btn btn-warning">Remove from bucket</a></td>
-                  <td>Price * quantity</td>
+                  {% for product_id, price in product_price.items %}
+                    {% if product_id == product.id %}
+                        <td>{{ price }}</td>
+                    {% endif %}
+                  {% endfor %}
                 </tr>
             {% endfor %}
+            <tr class="text-center mb-4">
+                <th scope="row"></th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><h4>{{ total_price }}</h4></td>
+            </tr>
           </tbody>
         </table>
       <a href="/clear_bucket/" class="btn btn-danger">Clear bucket</a>

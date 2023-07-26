@@ -51,8 +51,31 @@
 
     {% endif %}
     </a>
+    <div>
+        {% if product.get_available_status == "not_in_stock" %}
+            <strong><h5 style="color:grey"> Not in stock... =( </h5></strong>
+        {% elif product.get_available_status == "running_out" %}
+            <strong><h5 style="color:orange"> Running low </h5></strong>
+        {% else %}
+            <strong><h5 style="color:green"> In stock </h5></strong>
+        {% endif %}
+    </div>
     <hr>
-    <a href="/add_to_bucket/{{ product.id }}" class="btn btn-success">Add to bucket</a>
+    {% if product.is_sale %}
+        <h4 style="color:red">
+            <strike>
+                {{ product.price }} ₴
+            </strike>
+        </h4>
+    {% endif %}
+    <h4>
+        <strong>
+            <a href="#" class="dark-grey-text">{{ product.get_price }} ₴</a>
+        </strong>
+    </h4>
+    {% if product.get_available_status != "not_in_stock" %}
+        <a href="/add_to_bucket/{{ product.id }}" class="btn btn-success">Add to bucket</a>
+    {% endif %}
     <hr>
     <p>{{ product.description }}</p>
     {% if request.user.is_authenticated %}
@@ -66,8 +89,8 @@
 
     {% for comment in product.get_comments %}
         <hr>
-        <h5>{{ comment.author.username }}</h5><br>
-        {{ comment.published_date }}<br>
+        <h5><div style="color:grey">Author:</div> {{ comment.author.username }}</h5><br>
+    <div style="color:grey">{{ comment.published_date }}</div><br>
         {{ comment.comment }}<br>
     {% endfor %}
 

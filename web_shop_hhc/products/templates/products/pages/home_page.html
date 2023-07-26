@@ -36,29 +36,55 @@
             <div class="col-9">
 
                 <div style="height: 50px;">
-                    <form class="d-flex" role="search" action="/search_product_list/">
-                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"
+
+
+
+<!--                    <form class="d-flex" role="search" action="/search_product_list/">-->
+<!--                        <input class="form-control me-2" type="search" value="{{ request.GET.search }}" placeholder="Search" aria-label="Search"-->
+<!--                               name="search">-->
+<!--                        <button class="btn btn-outline-secondary" type="submit">Search</button>-->
+<!--                    </form>-->
+
+<!--                    <form action="">-->
+<!--                    Sorting by <select name="sorting" id="">-->
+<!--                    {% for option in sorting_options %}-->
+<!--                      <option value="{{ option }}" {% if option == request.GET.sorting %} selected {% endif %}>{{ option }}-->
+<!--                    </option>-->
+
+<!--                    {% endfor %}-->
+<!--                    </select>-->
+<!--                        <button class="btn btn-outline-secondary" type="submit">Accept</button>-->
+<!--                    </form>-->
+
+
+
+
+                    <form class="d-flex" {% if search is None %} action="" {% else %} action="/search_product_list/" {% endif %} >
+                        <div>
+                            <input class="form-control me-2" type="search" value="{{ request.GET.search }}" placeholder="Search" aria-label="Search"
                                name="search">
+
+                        </div>
                         <button class="btn btn-outline-secondary" type="submit">Search</button>
+                        <div>
+                            Sorting by
+                            <select name="sorting" id="">
+                                {% for option in sorting_options %}
+                                  <option value="{{ option }}" {% if option == request.GET.sorting %} selected {% endif %}>{{ option }}
+                                  </option>
+
+                                {% endfor %}
+                            </select>
+                            <button class="btn btn-outline-secondary" type="submit">Submit</button>
+                        </div>
+
                     </form>
+
                 </div>
 
-
+                <div>
                 {% include '../includes/breadcrumb.html' %}
-
-                <form action="">
-                Sorting by <select name="sorting" id="">
-<!--                <option value="rating">Rating</option>-->
-<!--                <option value="price_ascending">Price ascending</option>-->
-<!--                <option value="price_descending">Price descending</option>-->
-                {% for option in sorting_options %}
-                  <option value="{{ option }}" {% if selected_sorting_option == option %} selected {% endif %}>{{ option }}
-                </option>
-
-                {% endfor %}
-                </select>
-                    <button class="btn btn-outline-secondary" type="submit">Accept</button>
-                </form>
+                </div>
 
                 <div class=”col-xs-9” id=”product-content”>
                     <section class="text-center mb-4">
