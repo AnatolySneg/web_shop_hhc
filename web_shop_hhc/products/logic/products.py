@@ -18,7 +18,7 @@ class Bucket:
         while self.product_ids.count(product_id) != available:
             self.product_ids.remove(product_id)
 
-    def _quantity(self):
+    def _get_possible_quantity(self):
         product_quantity = {}
         available_product_quantity = {}
         for id_number in self.product_ids:
@@ -47,7 +47,7 @@ class Bucket:
                                               user_bucket={'products_in_bucket': self.product_ids})
 
     def _refresh_bucket_state(self):
-        self.product_quantity = self._quantity()
+        self.product_quantity = self._get_possible_quantity()
         if self.user_id:
             self._update_user_bucket()
 
@@ -71,7 +71,7 @@ class Bucket:
         else:
             self.product_ids = session_products_ids or []
         self.product_quantity_price = {}
-        self.product_quantity = self._quantity()
+        self.product_quantity = self._get_possible_quantity()
         self.product_quantity_total_price = self._get_total_price()
 
     def add_product(self, product_id):
@@ -120,3 +120,20 @@ class Ordering:
 
     def send_order_mail_report(self):
         OrderEmail(self.order)
+
+
+class OrderHistory:
+
+    def _get_orders(self):
+        self.orders = Order.objects.filter(user_id=self.user_id)
+        self._get_products_in_orders()
+
+    def _get_products_in_orders(self):
+        for order in self.orders:
+            products_quantity = order.products['products']
+            products_query = Product.objects.filter(id__in=products_quantity)
+            order.products_query = products_query
+
+    def __init__(self, user_id):
+        self.user_id = user_id
+        self._get_orders()

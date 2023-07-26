@@ -4,7 +4,65 @@
 
 {% block content %}
 <main>
-    <div><h1>{{ test_string }}</h1></div>
-    <h1>{{ test_string }}</h1><h1>{{ test_string }}</h1><h1>{{ test_string }}</h1>
+    {% if not product_quantity %}
+        <h1>Your bucket is empty</h1>
+    {% else %}
+        <div>
+            <h5>Your bucket:</h5>
+        </div>
+        <table class="table">
+          <thead class="text-center mb-4">
+            <tr>
+              <th scope="col">    </th>
+              <th scope="col">Title</th>
+              <th scope="col">Price</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">        </th>
+              <th scope="col">Total price</th>
+            </tr>
+          </thead>
+          <tbody class="table-group-divider" >
+            {% for product in bucket_products %}
+                <tr class="text-center mb-4">
+                  <th scope="row">
+                    <div class="image">
+                        <img src={{product.get_title_image.image.url}} width="80">
+                    </div>
+                  </th>
+                  <td>{{ product.title }}</td>
+                  <td>{{ product.get_price }} ₴</td>
+                  <td>
+                      {% for prod, quan in product_quantity.items %}
+                        {% if prod == product.id %}
+                            <a href="/less_to_bucket/{{ product.id }}"><strong><</strong></a>
+                            {{ quan }}
+                            {% if product.available_quantity > quan %}
+                                <a href="/more_to_bucket/{{ product.id }}"><strong>></strong></a>
+                            {% endif %}
+                        {% endif %}
+                      {% endfor %}
+
+                  </td>
+                  <td><a href="/remove_from_bucket/{{ product.id }}" class="btn btn-warning">Remove from bucket</a></td>
+                  {% for product_id, price in product_price.items %}
+                    {% if product_id == product.id %}
+                        <td>{{ price }}</td>
+                    {% endif %}
+                  {% endfor %}
+                </tr>
+            {% endfor %}
+            <tr class="text-center mb-4">
+                <th scope="row"></th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><h4>{{ total_price }}</h4></td>
+            </tr>
+          </tbody>
+        </table>
+      <a href="/clear_bucket/" class="btn btn-danger">Clear bucket</a>
+      <a href="/order/" class="btn btn-success">Make offer</a>
+    {% endif %}
 </main>
 {% endblock %}
