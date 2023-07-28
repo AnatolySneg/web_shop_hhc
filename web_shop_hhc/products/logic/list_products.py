@@ -48,35 +48,6 @@ class ProductListing:
     def _sorting_products(self):
         return self.sorting_option[self.product_sorting]
 
-    # def sorting_products(self):
-    #     def rating_sorting():
-    #         available_rating_sorted = sorted(self.product_list_available, key=lambda p: p.average_rating(),
-    #                                          reverse=True)
-    #         unavailable_rating_sorted = sorted(self.product_list_unavailable, key=lambda p: p.average_rating(),
-    #                                            reverse=True)
-    #         return available_rating_sorted, unavailable_rating_sorted
-    #
-    #     def price_ascending_sorting():
-    #         available_price_ascending_sorted = sorted(self.product_list_available, key=lambda p: p.get_price())
-    #         unavailable_price_ascending_sorted = sorted(self.product_list_unavailable,
-    #                                                     key=lambda p: p.get_price())
-    #         return available_price_ascending_sorted, unavailable_price_ascending_sorted
-    #
-    #     def price_descending_sorting():
-    #         available_price_descending_sorted = sorted(self.product_list_available, key=lambda p: p.get_price(),
-    #                                                    reverse=True)
-    #         unavailable_price_descending_sorted = sorted(self.product_list_unavailable,
-    #                                                      key=lambda p: p.get_price(), reverse=True)
-    #         return available_price_descending_sorted, unavailable_price_descending_sorted
-    #
-    #     sorting_option = {
-    #         "rating": rating_sorting(),
-    #         "price_ascending": price_ascending_sorting(),
-    #         "price_descending": price_descending_sorting()
-    #     }
-    #
-    #     return sorting_option[self.product_sorting]
-
     def __init__(self, category_id, type_id, product_filtering, product_sorting, search):
         self.category_id = category_id
         self.type_id = type_id

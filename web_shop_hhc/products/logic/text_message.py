@@ -14,8 +14,6 @@ def email_sender(subject, message, recipient_list=[settings.RECIPIENT_ADDRESS]):
     )
 
 
-# TODO: Change recipient_list to self.order.email
-
 class OrderEmail:
     def _get_optional_information(self):
         pickup_info = ''
@@ -25,7 +23,7 @@ class OrderEmail:
                            house=self.order_info.destination_house, apartment=self.order_info.destination_apartment)
         delivery_service_info = '\n\tDestination delivery office - {region}'.format(
             region=self.order_info.destination_region) + \
-                                '{country}, delivery office №{office}.'.format(
+                                ' {country}, delivery office №{office}.'.format(
                                     country=self.order_info.destination_country,
                                     office=self.order_info.destination_delivery_service)
 
@@ -91,6 +89,11 @@ class OrderEmail:
     def _order_admin_email_subject(self):
         return "Order №{}".format(self.order_info.id)
 
+    def _get_list_admins_email(self):
+        admins = User.objects.filter(is_staff=True)
+        admin_email_list = [admin.email for admin in admins]
+        return admin_email_list
+
     def __init__(self, order_info):
         self.order_info = order_info
         email_text = self._order_report_text()
@@ -98,8 +101,11 @@ class OrderEmail:
         self.admin_email_text = email_text['admin_email_text']
         self.customer_email_subject = self._order_customer_email_subject()
         self.admin_email_subject = self._order_admin_email_subject()
-        email_sender(subject=self.customer_email_subject, message=self.customer_email_text)
-        email_sender(subject=self.admin_email_subject, message=self.admin_email_text)
+        self.admin_email_list = self._get_list_admins_email()
+        email_sender(subject=self.customer_email_subject, message=self.customer_email_text,
+                     recipient_list=[self.order_info.email])
+        email_sender(subject=self.admin_email_subject, message=self.admin_email_text,
+                     recipient_list=self.admin_email_list)
 
 
 class RessetPasswordMail:
@@ -139,4 +145,5 @@ class RessetPasswordMail:
         self.reset_link = self._get_reset_link()
         self.email_reset_text = self._text_reset_password()
         self.email_reset_subject = self._subject_reset_password()
-        email_sender(subject=self.email_reset_subject, message=self.email_reset_text)
+        email_sender(subject=self.email_reset_subject, message=self.email_reset_text,
+                     recipient_list=[self.customer.email])

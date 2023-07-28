@@ -1,6 +1,5 @@
-from django.forms import PasswordInput, ModelForm, CharField, RadioSelect
+from django.forms import PasswordInput, ModelForm, CharField, RadioSelect, ValidationError
 from django.contrib.auth.models import User
-
 from django.contrib.auth.forms import UserCreationForm, SetPasswordForm
 from django.core.exceptions import ValidationError
 from .models import Customer, Order
@@ -17,6 +16,8 @@ class UserSignupForm(UserCreationForm):
     def clean(self):
         cleaned_data = super().clean()
         email = cleaned_data.get("email")
+        if not email:
+            raise ValidationError("This field should not be empty")
         is_db_email = User.objects.filter(email=email).exists()
         if is_db_email:
             raise ValidationError("Email exist")
@@ -41,8 +42,17 @@ class CustomerEmailForm(ModelForm):
         model = User
         fields = ['email']
 
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get('email')
+        if not email:
+            raise ValidationError("This field is required.")
+        users = User.objects.filter(email=email).exists()
+        if not users:
+            raise ValidationError("This email does not exist.")
 
-class ResetPassword(SetPasswordForm):
+
+class ResetPasswordForm(SetPasswordForm):
     class Meta:
         model = User
         fields = ['new_password1, new_password2']

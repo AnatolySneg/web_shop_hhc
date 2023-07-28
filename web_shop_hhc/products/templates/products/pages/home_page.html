@@ -9,7 +9,7 @@
             <div class="col-3">
 
                 <div class="accordion" id="accordionPanelsStayOpenExample">
-                    {% for category in categorys %}
+                    {% for category in categories %}
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="panelsStayOpen-headingOne">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -36,28 +36,6 @@
             <div class="col-9">
 
                 <div style="height: 50px;">
-
-
-
-<!--                    <form class="d-flex" role="search" action="/search_product_list/">-->
-<!--                        <input class="form-control me-2" type="search" value="{{ request.GET.search }}" placeholder="Search" aria-label="Search"-->
-<!--                               name="search">-->
-<!--                        <button class="btn btn-outline-secondary" type="submit">Search</button>-->
-<!--                    </form>-->
-
-<!--                    <form action="">-->
-<!--                    Sorting by <select name="sorting" id="">-->
-<!--                    {% for option in sorting_options %}-->
-<!--                      <option value="{{ option }}" {% if option == request.GET.sorting %} selected {% endif %}>{{ option }}-->
-<!--                    </option>-->
-
-<!--                    {% endfor %}-->
-<!--                    </select>-->
-<!--                        <button class="btn btn-outline-secondary" type="submit">Accept</button>-->
-<!--                    </form>-->
-
-
-
 
                     <form class="d-flex" {% if search is None %} action="" {% else %} action="/search_product_list/" {% endif %} >
                         <div>

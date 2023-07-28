@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import *
+from .models import User, Category, Type, Product, Order, Image, ShopContacts, ShopAddress, rate_updater, \
+    comment_saver, new_order_updater, confirm_order_updater
 from django.contrib.auth import authenticate, login as django_login, logout as django_logout
-from .forms import *
+from .forms import UserSignupForm, CustomerSignupForm, CustomerLoginForm, CustomerEmailForm, ResetPasswordForm, \
+    OrderFirstCreationForm
 from django.views.decorators.http import require_GET, require_http_methods
 from .logic.products import Bucket, Ordering
 from .logic.text_message import RessetPasswordMail
@@ -10,15 +12,12 @@ from .logic.list_products import ProductListing
 from django.utils.datastructures import MultiValueDictKeyError
 
 
-# from django.views.decorators.csrf import csrf_exempt
-
-
-# @csrf_exempt
 @require_GET
 def product_list(request, category_id=None, type_id=None, product_filtering=None, product_sorting='rating',
                  search=None):
     context = {'active_page': "home_page",
                'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
+
     category_obj = None
     if category_id:
         category_obj = Category.objects.get(id=category_id)
@@ -44,12 +43,9 @@ def product_list(request, category_id=None, type_id=None, product_filtering=None
     context['products'] = products.sorted_product_list_available
     context['out_of_stock'] = products.sorted_product_list_unavailable
     context['search'] = search
-
     context['sorting_options'] = products.sorting_option.keys()
     context['selected_sorting_option'] = product_sorting
-    context["categorys"] = Category.objects.all()
-    # context["types"] = Type.objects.all()
-
+    context["categories"] = Category.objects.all()
 
     return render(request, 'products/pages/home_page.html', context)
 
@@ -60,7 +56,6 @@ def product_detail(request, product_id):
                'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
     product = get_object_or_404(Product, id=product_id)
     images = Image.objects.filter(product_id=product_id)
-    # TODO: change pk to id in all files
     context['product'] = product
     context['images'] = images
     return render(request, 'products/pages/product_detail.html', context)
@@ -109,9 +104,7 @@ def login_page(request):
             if auth_user:
                 django_login(request, auth_user)
                 return redirect(product_list)
-            else:
-                # TODO: raise error if no user or incorrect password
-                context['error'] = 'User not found!'
+
     login_form = CustomerLoginForm()
     context['login_form'] = login_form
     context['active_page'] = "login_page"
@@ -132,9 +125,7 @@ def forgot_password_page(request):
         if email_form.is_valid():
             customer_email = email_form.save(commit=False)
             customer = User.objects.get(email=customer_email.email)
-            if customer:
-                return redirect(get_reset_password_link, customer_id=customer.id)
-            # TODO: change redirect function
+            return redirect(get_reset_password_link, customer_id=customer.id)
 
     email_form = CustomerEmailForm()
     context['email_form'] = email_form
@@ -160,12 +151,12 @@ def reset_password(request, secret_string):
     if not pas.secret_is_valid:
         return redirect(product_list)
     if request.method == "POST":
-        password_form = ResetPassword(data=request.POST, user=pas.user_reset_password)
+        password_form = ResetPasswordForm(data=request.POST, user=pas.user_reset_password)
         if password_form.is_valid():
             password_form.save()
             return render(request, 'products/pages/password_reset_success.html', context)
 
-    password_form = ResetPassword(user=pas.user_reset_password)
+    password_form = ResetPasswordForm(user=pas.user_reset_password)
     context['password_form'] = password_form
     return render(request, 'products/pages/reset_password_form.html', context)
 
@@ -173,11 +164,8 @@ def reset_password(request, secret_string):
 @require_GET
 def user_page(request):
     context = {'active_page': "user_page"}
-    context['test_string'] = "USER PAGE"
     orders_query = Order.objects.filter(user_id=request.user.id).order_by('-order_date')
     context['orders'] = orders_query
-
-    #TODO: make order_query sorted by date
     return render(request, 'products/pages/user_page.html', context)
 
 
@@ -230,7 +218,6 @@ def add_to_bucket(request, product_id):
     if request.META.get('HTTP_REFERER'):
         bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
         bucket.add_product(product_id)
-        #TODO: check product quantity befor add to bucket.
         request.session['products'] = bucket.product_ids
         request.session['products_for_order'] = bucket.product_quantity
         return redirect(request.META.get('HTTP_REFERER'))
@@ -305,7 +292,6 @@ def order_confirm(request, order_id):
 
 @require_GET
 def order_page(request, confirm_order_id):
-    # TODO: Take all object(order), not only id to minimise db call!!!
     bucket = Bucket(user_id=request.user.id, session_products_ids=request.session.get('products'))
     bucket.clear()
     confirmed_order = Ordering(confirm_order_id)

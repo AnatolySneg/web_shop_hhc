@@ -11,6 +11,7 @@ PRODUCT_VALID_DATA = {
     "available_quantity": 100,
 }
 
+
 class ProductModelTest(TestCase):
     @classmethod
     def setUpTestData(cls):
