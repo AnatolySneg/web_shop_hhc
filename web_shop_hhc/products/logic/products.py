@@ -126,14 +126,15 @@ class OrderHistory:
 
     def _get_orders(self):
         self.orders = Order.objects.filter(user_id=self.user_id)
-        self._get_products_in_orders()
 
     def _get_products_in_orders(self):
         for order in self.orders:
             products_quantity = order.products['products']
             products_query = Product.objects.filter(id__in=products_quantity)
             order.products_query = products_query
+        return self.orders
 
     def __init__(self, user_id):
         self.user_id = user_id
         self._get_orders()
+        self.orders_absolute = self._get_products_in_orders()

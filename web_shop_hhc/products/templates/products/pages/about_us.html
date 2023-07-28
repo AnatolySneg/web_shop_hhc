@@ -4,6 +4,46 @@
 
 {% block content %}
 <main>
-    <div><h1>{{ test_string }}</h1></div>
+    <div>
+        <h4>Our Shops:</h4>
+        {% for address in shop_addresses %}
+            <ul><h4>* {{ address.address }}</h4></ul>
+        {% endfor %}
+    </div>
+    <hr>
+    <hr>
+    <hr>
+    <div>
+
+        {% for contact in contacts %}
+            <h4> {{ contact.service }} contacts:</h4>
+            {% if contact.phone_number %}
+                <ul><h4>* {{ contact.phone_number }}</h4></ul>
+            {% endif %}
+            {% if contact.phone_number_2 %}
+                <ul><h4>* {{ contact.phone_number_2 }}</h4></ul>
+            {% endif %}
+            {% if contact.phone_number_3 %}
+                <ul><h4>* {{ contact.phone_number_3 }}</h4></ul>
+            {% endif %}
+            {% if contact.phone_number_4 %}
+                <ul><h4>* {{ contact.phone_number }}</h4></ul>
+            {% endif %}
+            {% if contact.email %}
+                <ul><h4>* {{ contact.email }}</h4></ul>
+            {% endif %}
+            {% if contact.email_2 %}
+                <ul><h4>* {{ contact.email_2 }}</h4></ul>
+            {% endif %}
+            {% if contact.email_3 %}
+                <ul><h4>* {{ contact.email_3 }}</h4></ul>
+            {% endif %}
+            {% if contact.email_4 %}
+                <ul><h4>* {{ contact.email_4 }}</h4></ul>
+            {% endif %}
+            <hr>
+
+        {% endfor %}
+    </div>
 </main>
 {% endblock %}

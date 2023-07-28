@@ -27,6 +27,14 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'available_quantity', 'price', 'is_sale', 'discount', ]
 
 
+# class ShopAddress(admin.ModelAdmin):
+#     list_display = ['id', 'address']
+#
+#
+# class ShopContacts(admin.ModelAdmin):
+#     list_display = ['id', 'email', 'phone_number']
+
+
 class CustomerInline(admin.StackedInline):
     model = Customer
 
@@ -46,6 +54,8 @@ admin.site.register(User, UserAdmin)
 admin.site.register(Order)
 admin.site.register(UserBucketProducts)
 admin.site.register(Product, ProductAdmin)
+admin.site.register(ShopContacts)
+admin.site.register(ShopAddress)
 # admin.site.register(UserBucketProducts, UserBucketProductsAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Type, TypeAdmin)

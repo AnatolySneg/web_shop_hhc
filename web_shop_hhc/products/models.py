@@ -7,6 +7,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
 from django.db.utils import IntegrityError
 from django.db.models import Avg
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class Category(models.Model):
@@ -37,7 +38,6 @@ class Product(models.Model):
     is_sale = models.BooleanField(default=False)
     discount = models.PositiveIntegerField(blank=True, null=True)
     available_quantity = models.PositiveIntegerField(default=0)
-    # TODO: with pre_save function make calculation of quantity
     type = models.ForeignKey(Type, default=None, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -86,31 +86,27 @@ class Image(models.Model):
         return f'image id - {self.id}'
 
     def save(self, *args, **kwargs):
-        list_image_objects = Image.objects.filter(product=self.product)
-        if self in list_image_objects or (self not in list_image_objects and self.title_image):
-            for image in list_image_objects:
-                image.title_image = False
-                super(Image, image).save(args, **kwargs)
+        product_images = Image.objects.filter(product=self.product)
+        if self.title_image:
+            try:
+                previous_title_image = product_images.get(title_image=True)
+                previous_title_image.title_image = False
+                super(Image, previous_title_image).save()
+            except ObjectDoesNotExist:
+                pass
+        if not product_images and not self.title_image:
             self.title_image = True
-            print("save method, {} is updating or creating new wis flag True".format(self))
-        elif not list_image_objects:
-            self.title_image = True
-            print("save method, {} is creating as a first obj".format(self))
-        else:
-            self.title_image = False
-            print("save method, {} is creating as another with False flag".format(self))
-        super(Image, self).save(*args, **kwargs)
-        print("hi from Save method", kwargs, self)
+        super(Image, self).save()
 
     def delete(self, *args, **kwargs):
-        list_image_objects = Image.objects.filter(product=self.product)
-        if len(list_image_objects) >= 1 and self.title_image:
-            for image in list_image_objects:
-                if image is not self:
-                    image.title_image = True
-                    super(Image, image).save()
-                    print("super save {} in delete".format(image.id))
-                    break
+        product_images = Image.objects.filter(product=self.product)
+        if len(product_images) > 1 and self.title_image:
+            try:
+                non_title_images = product_images.filter(title_image=False)
+                non_title_images[0].title_image = True
+                super(Image, non_title_images[0]).save()
+            except ObjectDoesNotExist:
+                pass
         super(Image, self).delete(args, kwargs)
 
 
@@ -131,8 +127,6 @@ class Rating(models.Model):
     rate = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], blank=True, null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
 
-
-# TODO: ADD USERS, COMMENTS, purchase history, product rating!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 def rate_updater(product_id, user_id, rate_value):
     rating, created = Rating.objects.get_or_create(product_id=product_id, author_id=user_id)
@@ -160,6 +154,28 @@ def secret_string_saver(secret_string, user_id):
         secret_raw.secret_string = secret_string
         secret_raw.creation_time = datetime.datetime.now()
         secret_raw.save()
+
+
+class ShopContacts(models.Model):
+    service = models.CharField(max_length=50, null=True)
+    email = models.EmailField(default=None, blank=True, null=True)
+    email_2 = models.EmailField(default=None, blank=True, null=True)
+    email_3 = models.EmailField(default=None, blank=True, null=True)
+    email_4 = models.EmailField(default=None, blank=True, null=True)
+    phone_number = PhoneNumberField(unique=True, region="UA", blank=True, null=True)
+    phone_number_2 = PhoneNumberField(unique=True, region="UA", blank=True, null=True)
+    phone_number_3 = PhoneNumberField(unique=True, region="UA", blank=True, null=True)
+    phone_number_4 = PhoneNumberField(unique=True, region="UA", blank=True, null=True)
+
+    def __str__(self):
+        return '{} contacts.'.format(self.service)
+
+
+class ShopAddress(models.Model):
+    address = models.CharField(max_length=100)
+
+    def __str__(self):
+        return 'shop address: {}.'.format(self.address)
 
 
 class UserBucketProducts(models.Model):
@@ -235,6 +251,14 @@ class Order(models.Model):
         return '{}, user - {}, full name: {} {}, delivery option: {}'.format(self.status, self.user,
                                                                              self.first_name, self.last_name,
                                                                              self.delivery_option)
+
+    def get_products_and_quantity(self):
+        product_quantity = self.products['products']
+        products_queryset = Product.objects.filter(id__in=product_quantity).order_by('id')
+        product_obj_quantity_dict = {}
+        for product in products_queryset:
+            product_obj_quantity_dict[product] = self.products['products'][str(product.id)]
+        return product_obj_quantity_dict
 
     def save(self, *args, **kwargs):
         if self.status == self.REJECT:

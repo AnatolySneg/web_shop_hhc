@@ -3,7 +3,7 @@ from .models import *
 from django.contrib.auth import authenticate, login as django_login, logout as django_logout
 from .forms import *
 from django.views.decorators.http import require_GET, require_http_methods
-from .logic.products import Bucket, Ordering, OrderHistory
+from .logic.products import Bucket, Ordering
 from .logic.text_message import RessetPasswordMail
 from .logic.customers import PasswordReset
 from .logic.list_products import ProductListing
@@ -89,9 +89,10 @@ def leave_a_comment(request, product_id):
 def contacts_page(request):
     context = {'active_page': "contacts_page",
                'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
-
-    test_string = "This string was rendered from views.contacts_page()"
-    context['test_string'] = test_string
+    shop_addresses = ShopAddress.objects.all()
+    contacts = ShopContacts.objects.all()
+    context['shop_addresses'] = shop_addresses
+    context['contacts'] = contacts
     return render(request, 'products/pages/about_us.html', context)
 
 
@@ -173,7 +174,7 @@ def reset_password(request, secret_string):
 def user_page(request):
     context = {'active_page': "user_page"}
     context['test_string'] = "USER PAGE"
-    orders_query = OrderHistory(request.user.id)
+    orders_query = Order.objects.filter(user_id=request.user.id).order_by('-order_date')
     context['orders'] = orders_query
 
     #TODO: make order_query sorted by date
