@@ -5,16 +5,17 @@ import random
 import string
 
 
-def email_sender(subject, message, recipient_list=[settings.RECIPIENT_ADDRESS]):
-    send_mail(
-        subject=subject,
-        message=message,
-        from_email=settings.EMAIL_HOST_USER,
-        recipient_list=recipient_list
-    )
+class EmailSender:
+    def email_sender(self, subject, message, recipient_list=[settings.RECIPIENT_ADDRESS]):
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=recipient_list
+        )
 
 
-class OrderEmail:
+class OrderEmail(EmailSender):
     def _get_optional_information(self):
         pickup_info = ''
         courier_info = '\n\tDestination address - {region}'.format(region=self.order_info.destination_region) + \
@@ -102,19 +103,15 @@ class OrderEmail:
         self.customer_email_subject = self._order_customer_email_subject()
         self.admin_email_subject = self._order_admin_email_subject()
         self.admin_email_list = self._get_list_admins_email()
-        # email_sender(subject=self.customer_email_subject, message=self.customer_email_text,
-        #              recipient_list=[self.order_info.email])
-        # email_sender(subject=self.admin_email_subject, message=self.admin_email_text,
-        #              recipient_list=self.admin_email_list)
 
     def send(self):
-        email_sender(subject=self.customer_email_subject, message=self.customer_email_text,
-                     recipient_list=[self.order_info.email])
-        email_sender(subject=self.admin_email_subject, message=self.admin_email_text,
-                     recipient_list=self.admin_email_list)
+        self.email_sender(subject=self.customer_email_subject, message=self.customer_email_text,
+                          recipient_list=[self.order_info.email])
+        self.email_sender(subject=self.admin_email_subject, message=self.admin_email_text,
+                          recipient_list=self.admin_email_list)
 
 
-class RessetPasswordMail:
+class RessetPasswordMail(EmailSender):
     def _get_customer(self):
         customer = User.objects.get(id=self.customer_id)
         return customer
@@ -151,9 +148,7 @@ class RessetPasswordMail:
         self.reset_link = self._get_reset_link()
         self.email_reset_text = self._text_reset_password()
         self.email_reset_subject = self._subject_reset_password()
-        # email_sender(subject=self.email_reset_subject, message=self.email_reset_text,
-        #              recipient_list=[self.customer.email])
 
     def send(self):
-        email_sender(subject=self.email_reset_subject, message=self.email_reset_text,
-                     recipient_list=[self.customer.email])
+        self.email_sender(subject=self.email_reset_subject, message=self.email_reset_text,
+                          recipient_list=[self.customer.email])
