@@ -15,7 +15,8 @@
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
                                     aria-controls="panelsStayOpen-collapseOne">
-                                <a href="/category_product_list/{{ category.id }}"><strong><h4>{{ category.name }}</h4>
+                                <a href="/?category={{ category.id }}{% if request.GET.sorting %}&sorting={{ request.GET.sorting }}{% endif %}"><strong>
+                                    <h4>{{ category.name }}</h4>
                                 </strong></a>
                             </button>
                         </h2>
@@ -23,7 +24,8 @@
                              aria-labelledby="panelsStayOpen-headingOne">
                             {% for type in category.get_type %}
                             <div class="accordion-body">
-                                <a href="/type_product_list/{{ type.id }}"><h6>{{ type.name }}</h6></a>
+                                <a href="/?type={{ type.id }}{% if request.GET.sorting %}&sorting={{ request.GET.sorting }}{% endif %}">
+                                    <h6>{{ type.name }}</h6></a>
                             </div>
                             {% endfor %}
                         </div>
@@ -37,31 +39,37 @@
 
                 <div style="height: 50px;">
 
-                    <form class="d-flex" {% if search is None %} action="" {% else %} action="/search_product_list/" {% endif %} >
+                    <form class="d-flex" action="/">
                         <div>
-                            <input class="form-control me-2" type="search" value="{{ request.GET.search }}" placeholder="Search" aria-label="Search"
-                               name="search">
+                            <input class="form-control me-2" type="search" value="{{ request.GET.search }}"
+                                   placeholder="Search" aria-label="Search"
+                                   name="search">
 
-                        </div>
-                        <button class="btn btn-outline-secondary" type="submit">Search</button>
-                        <div>
                             Sorting by
                             <select name="sorting" id="">
                                 {% for option in sorting_options %}
-                                  <option value="{{ option }}" {% if option == request.GET.sorting %} selected {% endif %}>{{ option }}
-                                  </option>
-
+                                <option value="{{ option }}" {% if option == request.GET.sorting %} selected {% endif %}>
+                                    {{ option }}
+                                </option>
                                 {% endfor %}
                             </select>
-                            <button class="btn btn-outline-secondary" type="submit">Submit</button>
-                        </div>
 
+                            {% if request.GET.category %}
+                            <input type="hidden" name="category" value="{{ request.GET.category }}">
+                            {% endif %}
+
+                            {% if request.GET.type %}
+                            <input type="hidden" name="type" value="{{ request.GET.type }}">
+                            {% endif %}
+
+                            <button class="btn btn-outline-secondary" type="submit">Search</button>
+                        </div>
                     </form>
 
                 </div>
 
                 <div>
-                {% include '../includes/breadcrumb.html' %}
+                    {% include '../includes/breadcrumb.html' %}
                 </div>
 
                 <div class=”col-xs-9” id=”product-content”>
@@ -84,20 +92,20 @@
                                             <h6>{{ product.average_rating }}/5</h6>
                                         </a>
                                         {% if product.get_available_status == "not_in_stock" %}
-                                            <strong><h5 style="color:grey"> Not in stock... =( </h5></strong>
+                                        <strong><h5 style="color:grey"> Not in stock... =( </h5></strong>
                                         {% elif product.get_available_status == "running_out" %}
-                                            <strong><h5 style="color:orange"> Running low </h5></strong>
+                                        <strong><h5 style="color:orange"> Running low </h5></strong>
                                         {% else %}
-                                            <strong><h5 style="color:green"> In stock </h5></strong>
+                                        <strong><h5 style="color:green"> In stock </h5></strong>
                                         {% endif %}
                                         {% if product.is_sale %}
-                                            <h6 style="color:red">
-                                                <strike>
-                                                    {{ product.price }} ₴
-                                                </strike>
-                                            </h6>
+                                        <h6 style="color:red">
+                                            <strike>
+                                                {{ product.price }} ₴
+                                            </strike>
+                                        </h6>
                                         {% else %}
-                                            <h6 style="color:white">
+                                        <h6 style="color:white">
                                             Easter Egg
                                         </h6>
                                         {% endif %}
@@ -130,22 +138,22 @@
                                             <h6>{{ product.average_rating }}/5</h6>
                                         </a>
                                         {% if product.get_available_status == "not_in_stock" %}
-                                            <strong><h5 style="color:grey"> Not in stock... =( </h5></strong>
+                                        <strong><h5 style="color:grey"> Not in stock... =( </h5></strong>
                                         {% elif product.get_available_status == "running_out" %}
-                                            <strong><h5 style="color:orange"> Running low </h5></strong>
+                                        <strong><h5 style="color:orange"> Running low </h5></strong>
                                         {% else %}
-                                            <strong><h5 style="color:green"> In stock </h5></strong>
+                                        <strong><h5 style="color:green"> In stock </h5></strong>
                                         {% endif %}
                                         {% if product.is_sale %}
-                                            <h6>
-                                                <strike>
-                                                    {{ product.price }} ₴
-                                                </strike>
-                                            </h6>
+                                        <h6>
+                                            <strike>
+                                                {{ product.price }} ₴
+                                            </strike>
+                                        </h6>
                                         {% else %}
-                                            <h6 style="color:white">
-                                                Easter Egg
-                                            </h6>
+                                        <h6 style="color:white">
+                                            Easter Egg
+                                        </h6>
                                         {% endif %}
                                         <h6>
                                             <strong>
