@@ -13,31 +13,36 @@ from django.utils.datastructures import MultiValueDictKeyError
 
 
 @require_GET
-def product_list(request, category_id=None, type_id=None, product_filtering=None, product_sorting='rating',
-                 search=None):
+def product_list(request):
     context = {'active_page': "home_page",
                'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
 
-    category_obj = None
-    if category_id:
-        category_obj = Category.objects.get(id=category_id)
-    context["category"] = category_obj
-
-    type_obj = None
-    if type_id:
-        type_obj = Type.objects.get(id=type_id)
-    context["type"] = type_obj
-
+    category_id = request.GET.get('category')
+    type_id = request.GET.get('type')
     search_value = request.GET.get('search')
     product_sorting_value = request.GET.get('sorting')
 
+    context["category"] = None
+    if category_id:
+        category_obj = Category.objects.get(id=category_id)
+        context["category"] = category_obj
+
+    context["type"] = None
+    if type_id:
+        type_obj = Type.objects.get(id=type_id)
+        context["type"] = type_obj
+
+    product_sorting = None
     if product_sorting_value:
         product_sorting = product_sorting_value
 
+    search = None
     if search_value:
         search = search_value
+        category_id = None
+        type_id = None
 
-    products = ProductListing(category_id=category_id, type_id=type_id, product_filtering=product_filtering,
+    products = ProductListing(category_id=category_id, type_id=type_id,
                               product_sorting=product_sorting,
                               search=search)
     context['products'] = products.sorted_product_list_available
@@ -52,9 +57,9 @@ def product_list(request, category_id=None, type_id=None, product_filtering=None
 
 @require_GET
 def product_detail(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
     context = {'active_page': "home_page",
                'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
-    product = get_object_or_404(Product, id=product_id)
     images = Image.objects.filter(product_id=product_id)
     context['product'] = product
     context['images'] = images

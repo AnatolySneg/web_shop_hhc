@@ -48,10 +48,9 @@ class ProductListing:
     def _sorting_products(self):
         return self.sorting_option[self.product_sorting]
 
-    def __init__(self, category_id, type_id, product_filtering, product_sorting, search):
+    def __init__(self, category_id, type_id, product_sorting, search):
         self.category_id = category_id
         self.type_id = type_id
-        self.product_filtering = product_filtering
         self.product_sorting = product_sorting
         self.search = search
         if search:
