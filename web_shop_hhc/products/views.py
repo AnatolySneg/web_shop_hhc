@@ -74,12 +74,16 @@ def set_rating(request, product_id):
         rate_updater(product_id=product_id, user_id=user_id, rate_value=rate_value)
     except MultiValueDictKeyError:
         pass
+    except ValueError:
+        pass
+    except KeyError:
+        pass
     return redirect(product_detail, product_id=product_id)
 
 
 @require_GET
 def leave_a_comment(request, product_id):
-    comment = request.GET['comment']
+    comment = request.GET.get('comment')
     user_id = request.user.id
     comment_saver(product_id=product_id, user_id=user_id, comment=comment)
     return redirect(product_detail, product_id=product_id)
