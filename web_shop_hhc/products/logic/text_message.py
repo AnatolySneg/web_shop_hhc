@@ -102,6 +102,12 @@ class OrderEmail:
         self.customer_email_subject = self._order_customer_email_subject()
         self.admin_email_subject = self._order_admin_email_subject()
         self.admin_email_list = self._get_list_admins_email()
+        # email_sender(subject=self.customer_email_subject, message=self.customer_email_text,
+        #              recipient_list=[self.order_info.email])
+        # email_sender(subject=self.admin_email_subject, message=self.admin_email_text,
+        #              recipient_list=self.admin_email_list)
+
+    def send(self):
         email_sender(subject=self.customer_email_subject, message=self.customer_email_text,
                      recipient_list=[self.order_info.email])
         email_sender(subject=self.admin_email_subject, message=self.admin_email_text,
@@ -145,5 +151,9 @@ class RessetPasswordMail:
         self.reset_link = self._get_reset_link()
         self.email_reset_text = self._text_reset_password()
         self.email_reset_subject = self._subject_reset_password()
+        # email_sender(subject=self.email_reset_subject, message=self.email_reset_text,
+        #              recipient_list=[self.customer.email])
+
+    def send(self):
         email_sender(subject=self.email_reset_subject, message=self.email_reset_text,
                      recipient_list=[self.customer.email])

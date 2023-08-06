@@ -119,7 +119,8 @@ class Ordering:
         return order_options[self.delivery_option]
 
     def send_order_mail_report(self):
-        OrderEmail(self.order)
+        order_mail = OrderEmail(self.order)
+        order_mail.send()
 
 
 class OrderHistory:

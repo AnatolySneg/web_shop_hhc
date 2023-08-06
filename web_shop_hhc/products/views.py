@@ -147,6 +147,7 @@ def get_reset_password_link(request, customer_id):
     context = {'header_bucket_counter': Bucket.header_bucket_counter(request.session.get('products'))}
     path = request.build_absolute_uri()
     instance = RessetPasswordMail(customer_id=customer_id, path=path)
+    instance.send()
     email = instance.customer.email
     context['email'] = email
     return render(request, 'products/pages/reset_instructions.html', context)
