@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase, SimpleTestCase
 from .models import Product, Category, Type, Image
 
 PRODUCT_VALID_DATA = {
