@@ -7,3 +7,4 @@ __pycache__
 *.jpg
 /web_shop_hhc/products/fixtures/
 .env
+models_fixtures/
