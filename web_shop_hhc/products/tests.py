@@ -145,7 +145,7 @@ product_5 = {'id': 6, 'title': 'Floor cleaner 1',
              'price': 80.0, 'is_sale': True, 'discount': 10, 'available_quantity': 89,
              'type_id': 4}
 product_6 = {'id': 7, 'title': 'Floor cleaner 2',
-             'description': 'Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION Floor cleaner 2 DESCRIPTION',
+             'description': '1000',
              'price': 40.0, 'is_sale': False, 'discount': None,
              'available_quantity': 12, 'type_id': 4}
 
@@ -153,20 +153,49 @@ product_6 = {'id': 7, 'title': 'Floor cleaner 2',
 class EnyDataTesting(TestCase):
     @classmethod
     def setUpTestData(cls):
-        Category.objects.create(**category_1)
-        Category.objects.create(**category_2)
+        ctg_1 = Category(**category_1)
+        ctg_1.save()
+        ctg_2 = Category(**category_2)
+        ctg_2.save()
 
-        Type.objects.create(**type_1)
-        Type.objects.create(**type_2)
-        Type.objects.create(**type_3)
-        Type.objects.create(**type_4)
+        tp_1 = Type(**type_1)
+        tp_1.save()
+        tp_2 = Type(**type_2)
+        tp_2.save()
+        tp_3 = Type(**type_3)
+        tp_3.save()
+        tp_4 = Type(**type_4)
+        tp_4.save()
 
-        Product.objects.create(**product_1)
-        Product.objects.create(**product_2)
-        Product.objects.create(**product_3)
-        Product.objects.create(**product_4)
-        Product.objects.create(**product_5)
-        Product.objects.create(**product_6)
+        prd_1 = Product(**product_1)
+        prd_1.save()
+        prd_2 = Product(**product_2)
+        prd_2.save()
+        prd_3 = Product(**product_3)
+        prd_3.save()
+        prd_4 = Product(**product_4)
+        prd_4.save()
+        prd_5 = Product(**product_5)
+        prd_5.save()
+        prd_6 = Product(**product_6)
+        prd_6.save()
+
+        # Category.objects.create(**category_1)
+        # Category.objects.create(**category_2)
+        #
+        # Type.objects.create(**type_1)
+        # Type.objects.create(**type_2)
+        # Type.objects.create(**type_3)
+        # Type.objects.create(**type_4)
+        #
+        # Product.objects.create(**product_1)
+        # Product.objects.create(**product_2)
+        # Product.objects.create(**product_3)
+        # Product.objects.create(**product_4)
+        # Product.objects.create(**product_5)
+        # Product.objects.create(**product_6)
+        #
+        #
 
     def test_get_category(self):
         category = Category.objects.get(id=1)
@@ -194,13 +223,44 @@ class EnyDataTesting(TestCase):
         product = Product.objects.get(title='Floor cleaner 2')
         self.assertEqual(product.id, product_6["id"])
 
+    def test_get_product_else(self):
+        product = Product.objects.get(id=7)
+        self.assertEqual(product.description, '1000')
 
-class RequestProductsTesting(unittest.TestCase):
-    # def test_get_products(self):
-    #     response = client.get("")
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(len(response.context["products"]), 6)
 
-    def test_get_product(self):
-        product = Product.objects.get(id=14)
-        self.assertEqual(product.available_quantity, 1)
+class RequestProductsTesting(EnyDataTesting):
+    def test_get_products(self):
+        response = client.get("")
+        self.assertEqual(response.status_code, 200)
+        products = response.context["products"]
+        out_of_stock = response.context["out_of_stock"]
+        self.assertEqual(len(products), 4)
+        self.assertEqual(len(out_of_stock), 2)
+        self.assertEqual(products.get(id=2).title, 'Soap 2')
+
+    def test_get_product_detail(self):
+        response = client.get("/product_detail/7/")
+        self.assertEqual(response.status_code, 200)
+        response = client.get("/product_detail/9999/")
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_products_search(self):
+        response = client.get("",
+                              data={'search': 'soa', 'sorting': 'rating'})
+        products = response.context["products"]
+        out_of_stock = response.context["out_of_stock"]
+        self.assertEqual(products[0].title, 'Soap 1')
+        self.assertEqual(products[1].title, 'Soap 2')
+        self.assertEqual(out_of_stock[0].title, 'Soap 4')
+        self.assertEqual(out_of_stock[1].title, 'Soap 5')
+
+    def test_get_products_type(self):
+        response = client.get("",
+                              data={'type': '3', 'sorting': 'rating'})
+        products = response.context["products"]
+        out_of_stock = response.context["out_of_stock"]
+        self.assertEqual(products[0].title, 'Soap 1')
+        self.assertEqual(products[1].title, 'Soap 2')
+        self.assertEqual(out_of_stock[0].title, 'Soap 4')
+        self.assertEqual(out_of_stock[1].title, 'Soap 5')
+
