@@ -182,7 +182,6 @@ def user_page(request):
 @require_http_methods(["GET", "POST"])
 def signup(request):
     if request.method == 'POST':
-        print("request.POST", request.POST)
         user_form = UserSignupForm(request.POST)
         customer_form = CustomerSignupForm(request.POST)
         if user_form.is_valid() and customer_form.is_valid():

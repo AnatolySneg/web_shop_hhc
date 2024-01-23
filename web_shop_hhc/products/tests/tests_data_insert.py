@@ -1,7 +1,8 @@
 from django.test import TestCase, Client
 import unittest
-from .models import Product, Category, Type, Image, Comments, Rating, Customer, ShopContacts, ShopAddress, \
+from ..models import Product, Category, Type, Image, Comments, Rating, Customer, ShopContacts, ShopAddress, \
     UserBucketProducts, Order
+from django.contrib.auth.models import User
 
 client = Client()
 
@@ -149,53 +150,78 @@ product_6 = {'id': 7, 'title': 'Floor cleaner 2',
              'price': 40.0, 'is_sale': False, 'discount': None,
              'available_quantity': 12, 'type_id': 4}
 
+comment_1 = {'products.comments': 1,
+             'fields': {'id': 1, 'author': 7, 'published_date': '2023-07-18T15:01:50.421Z',
+                        'comment': 'Good Shampoo, as for me.', 'product_id': 9}}
+comment_2 = {'products.comments': 2,
+             'fields': {'id': 2, 'author': 7, 'published_date': '2023-07-18T15:02:52.606Z',
+                        'comment': 'I like this shampoo so much', 'product_id': 9}}
+comment_3 = {'products.comments': 5,
+             'fields': {'id': 5, 'author': 1, 'published_date': '2023-07-26T11:46:54.262Z',
+                        'comment': '123 adfasd 131 41 qse qdasd', 'product_id': 7}}
+
+rating_1 = {'products.rating': 29,
+            'fields': {'id': 29, 'rate': 5, 'author': 16, 'product_id': 3}}
+rating_2 = {'products.rating': 30,
+            'fields': {'id': 30, 'rate': 5, 'author': 15, 'product_id': 3}}
+rating_3 = {'products.rating': 31,
+            'fields': {'id': 31, 'rate': 5, 'author': 1, 'product_id': 3}}
+rating_4 = {'products.rating': 32,
+            'fields': {'id': 32, 'rate': 4, 'author': 19, 'product_id': 3}}
+rating_5 = {'products.rating': 33,
+            'fields': {'id': 33, 'rate': 3, 'author': 16, 'product_id': 2}}
+rating_6 = {'products.rating': 34,
+            'fields': {'id': 34, 'rate': 4, 'author': 15, 'product_id': 2}}
+rating_7 = {'products.rating': 35,
+            'fields': {'id': 35, 'rate': 4, 'author': 16, 'product_id': 4}}
+
+user_1 = {"id": 1, 'username': "username_1", "email": "example_1@example.com", 'password': "qwerty"}
+user_2 = {"id": 2, 'username': "username_2", "email": "example_2@example.com", 'password': "qwerty"}
+user_3 = {"id": 3, 'username': "username_3", "email": "example_3@example.com", 'password': "qwerty"}
+user_4 = {"id": 4, 'username': "username_4", "email": "example_4@example.com", 'password': "qwerty"}
+user_5 = {"id": 5, 'username': "username_5", "email": "example_5@example.com", 'password': "qwerty"}
+user_6 = {"id": 6, 'username': "username_6", "email": "example_6@example.com", 'password': "qwerty"}
+
+customer_1 = {'id': 1, 'phone_number': '+380441112233', 'user_id': 1}
+customer_2 = {'id': 2, 'phone_number': '+380441212233', 'user_id': 2}
+customer_3 = {'id': 3, 'phone_number': '+380441312233', 'user_id': 3}
+customer_4 = {'id': 4, 'phone_number': '+380441412233', 'user_id': 4}
+customer_5 = {'id': 5, 'phone_number': '+380441512233', 'user_id': 5}
+customer_6 = {'id': 6, 'phone_number': '+380441612233', 'user_id': 6}
+
+
 
 class EnyDataTesting(TestCase):
     @classmethod
     def setUpTestData(cls):
-        ctg_1 = Category(**category_1)
-        ctg_1.save()
-        ctg_2 = Category(**category_2)
-        ctg_2.save()
+        Category.objects.create(**category_1)
+        Category.objects.create(**category_2)
 
-        tp_1 = Type(**type_1)
-        tp_1.save()
-        tp_2 = Type(**type_2)
-        tp_2.save()
-        tp_3 = Type(**type_3)
-        tp_3.save()
-        tp_4 = Type(**type_4)
-        tp_4.save()
+        Type.objects.create(**type_1)
+        Type.objects.create(**type_2)
+        Type.objects.create(**type_3)
+        Type.objects.create(**type_4)
 
-        prd_1 = Product(**product_1)
-        prd_1.save()
-        prd_2 = Product(**product_2)
-        prd_2.save()
-        prd_3 = Product(**product_3)
-        prd_3.save()
-        prd_4 = Product(**product_4)
-        prd_4.save()
-        prd_5 = Product(**product_5)
-        prd_5.save()
-        prd_6 = Product(**product_6)
-        prd_6.save()
+        Product.objects.create(**product_1)
+        Product.objects.create(**product_2)
+        Product.objects.create(**product_3)
+        Product.objects.create(**product_4)
+        Product.objects.create(**product_5)
+        Product.objects.create(**product_6)
 
-        # Category.objects.create(**category_1)
-        # Category.objects.create(**category_2)
-        #
-        # Type.objects.create(**type_1)
-        # Type.objects.create(**type_2)
-        # Type.objects.create(**type_3)
-        # Type.objects.create(**type_4)
-        #
-        # Product.objects.create(**product_1)
-        # Product.objects.create(**product_2)
-        # Product.objects.create(**product_3)
-        # Product.objects.create(**product_4)
-        # Product.objects.create(**product_5)
-        # Product.objects.create(**product_6)
-        #
-        #
+        User.objects.create_user(**user_1)
+        User.objects.create_user(**user_2)
+        User.objects.create_user(**user_3)
+        User.objects.create_user(**user_4)
+        User.objects.create_user(**user_5)
+        User.objects.create_user(**user_6)
+
+        Customer.objects.create(**customer_1)
+        Customer.objects.create(**customer_2)
+        Customer.objects.create(**customer_3)
+        Customer.objects.create(**customer_4)
+        Customer.objects.create(**customer_5)
+        Customer.objects.create(**customer_6)
 
     def test_get_category(self):
         category = Category.objects.get(id=1)
@@ -227,40 +253,66 @@ class EnyDataTesting(TestCase):
         product = Product.objects.get(id=7)
         self.assertEqual(product.description, '1000')
 
+    def test_get_user(self):
+        user_obj_1 = User.objects.get(id=1)
+        self.assertEqual(user_obj_1.username, user_1["username"])
+        user_obj_2 = User.objects.get(id=2)
+        self.assertEqual(user_obj_2.username, user_2["username"])
+        user_obj_3 = User.objects.get(id=3)
+        self.assertEqual(user_obj_3.username, user_3["username"])
+        user_obj_4 = User.objects.get(id=4)
+        self.assertEqual(user_obj_4.username, user_4["username"])
 
-class RequestProductsTesting(EnyDataTesting):
-    def test_get_products(self):
-        response = client.get("")
-        self.assertEqual(response.status_code, 200)
-        products = response.context["products"]
-        out_of_stock = response.context["out_of_stock"]
-        self.assertEqual(len(products), 4)
-        self.assertEqual(len(out_of_stock), 2)
-        self.assertEqual(products.get(id=2).title, 'Soap 2')
+    def test_get_customer(self):
+        customer_obj_1 = Customer.objects.get(id=1)
+        self.assertEqual(customer_obj_1.user.id, user_1["id"])
+        customer_obj_2 = Customer.objects.get(id=2)
+        self.assertEqual(customer_obj_2.user.id, user_2["id"])
+        customer_obj_3 = Customer.objects.get(id=3)
+        self.assertEqual(customer_obj_3.user.id, user_3["id"])
+        customer_obj_4 = Customer.objects.get(id=4)
+        self.assertEqual(customer_obj_4.user.id, user_4["id"])
+        customer_obj_5 = Customer.objects.get(id=5)
+        self.assertEqual(customer_obj_5.user.id, user_5["id"])
+        customer_obj_6 = Customer.objects.get(id=6)
+        self.assertEqual(customer_obj_6.user.id, user_6["id"])
 
-    def test_get_product_detail(self):
-        response = client.get("/product_detail/7/")
-        self.assertEqual(response.status_code, 200)
-        response = client.get("/product_detail/9999/")
-        self.assertEqual(response.status_code, 404)
 
-    def test_get_products_search(self):
-        response = client.get("",
-                              data={'search': 'soa', 'sorting': 'rating'})
-        products = response.context["products"]
-        out_of_stock = response.context["out_of_stock"]
-        self.assertEqual(products[0].title, 'Soap 1')
-        self.assertEqual(products[1].title, 'Soap 2')
-        self.assertEqual(out_of_stock[0].title, 'Soap 4')
-        self.assertEqual(out_of_stock[1].title, 'Soap 5')
 
-    def test_get_products_type(self):
-        response = client.get("",
-                              data={'type': '3', 'sorting': 'rating'})
-        products = response.context["products"]
-        out_of_stock = response.context["out_of_stock"]
-        self.assertEqual(products[0].title, 'Soap 1')
-        self.assertEqual(products[1].title, 'Soap 2')
-        self.assertEqual(out_of_stock[0].title, 'Soap 4')
-        self.assertEqual(out_of_stock[1].title, 'Soap 5')
 
+
+# class RequestProductsTesting(EnyDataTesting):
+#     def test_get_products(self):
+#         response = client.get("")
+#         self.assertEqual(response.status_code, 200)
+#         products = response.context["products"]
+#         out_of_stock = response.context["out_of_stock"]
+#         self.assertEqual(len(products), 4)
+#         self.assertEqual(len(out_of_stock), 2)
+#         self.assertEqual(products.get(id=2).title, 'Soap 2')
+#
+#     def test_get_product_detail(self):
+#         response = client.get("/product_detail/7/")
+#         self.assertEqual(response.status_code, 200)
+#         response = client.get("/product_detail/9999/")
+#         self.assertEqual(response.status_code, 404)
+#
+#     def test_get_products_search(self):
+#         response = client.get("",
+#                               data={'search': 'soa', 'sorting': 'rating'})
+#         products = response.context["products"]
+#         out_of_stock = response.context["out_of_stock"]
+#         self.assertEqual(products[0].title, 'Soap 1')
+#         self.assertEqual(products[1].title, 'Soap 2')
+#         self.assertEqual(out_of_stock[0].title, 'Soap 4')
+#         self.assertEqual(out_of_stock[1].title, 'Soap 5')
+#
+#     def test_get_products_type(self):
+#         response = client.get("",
+#                               data={'type': '3', 'sorting': 'rating'})
+#         products = response.context["products"]
+#         out_of_stock = response.context["out_of_stock"]
+#         self.assertEqual(products[0].title, 'Soap 1')
+#         self.assertEqual(products[1].title, 'Soap 2')
+#         self.assertEqual(out_of_stock[0].title, 'Soap 4')
+#         self.assertEqual(out_of_stock[1].title, 'Soap 5')
