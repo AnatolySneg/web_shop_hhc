@@ -150,30 +150,20 @@ product_6 = {'id': 7, 'title': 'Floor cleaner 2',
              'price': 40.0, 'is_sale': False, 'discount': None,
              'available_quantity': 12, 'type_id': 4}
 
-comment_1 = {'products.comments': 1,
-             'fields': {'id': 1, 'author': 7, 'published_date': '2023-07-18T15:01:50.421Z',
-                        'comment': 'Good Shampoo, as for me.', 'product_id': 9}}
-comment_2 = {'products.comments': 2,
-             'fields': {'id': 2, 'author': 7, 'published_date': '2023-07-18T15:02:52.606Z',
-                        'comment': 'I like this shampoo so much', 'product_id': 9}}
-comment_3 = {'products.comments': 5,
-             'fields': {'id': 5, 'author': 1, 'published_date': '2023-07-26T11:46:54.262Z',
-                        'comment': '123 adfasd 131 41 qse qdasd', 'product_id': 7}}
+comment_1 = {'id': 1, 'author': 7, 'published_date': '2023-07-18T15:01:50.421Z',
+             'comment': 'Good Shampoo, as for me.', 'product_id': 9}
+comment_2 = {'id': 2, 'author': 7, 'published_date': '2023-07-18T15:02:52.606Z',
+             'comment': 'I like this shampoo so much', 'product_id': 9}
+comment_3 = {'id': 5, 'author': 1, 'published_date': '2023-07-26T11:46:54.262Z',
+             'comment': '123 adfasd 131 41 qse qdasd', 'product_id': 7}
 
-rating_1 = {'products.rating': 29,
-            'fields': {'id': 29, 'rate': 5, 'author': 16, 'product_id': 3}}
-rating_2 = {'products.rating': 30,
-            'fields': {'id': 30, 'rate': 5, 'author': 15, 'product_id': 3}}
-rating_3 = {'products.rating': 31,
-            'fields': {'id': 31, 'rate': 5, 'author': 1, 'product_id': 3}}
-rating_4 = {'products.rating': 32,
-            'fields': {'id': 32, 'rate': 4, 'author': 19, 'product_id': 3}}
-rating_5 = {'products.rating': 33,
-            'fields': {'id': 33, 'rate': 3, 'author': 16, 'product_id': 2}}
-rating_6 = {'products.rating': 34,
-            'fields': {'id': 34, 'rate': 4, 'author': 15, 'product_id': 2}}
-rating_7 = {'products.rating': 35,
-            'fields': {'id': 35, 'rate': 4, 'author': 16, 'product_id': 4}}
+rating_1 = {'id': 1, 'rate': 5, 'author': 1, 'product_id': 1}
+rating_2 = {'id': 2, 'rate': 5, 'author': 1, 'product_id': 2}
+rating_3 = {'id': 3, 'rate': 5, 'author': 1, 'product_id': 3}
+rating_4 = {'id': 4, 'rate': 4, 'author': 2, 'product_id': 3}
+rating_5 = {'id': 5, 'rate': 3, 'author': 2, 'product_id': 2}
+rating_6 = {'id': 6, 'rate': 4, 'author': 2, 'product_id': 1}
+rating_7 = {'id': 7, 'rate': 4, 'author': 3, 'product_id': 1}
 
 user_1 = {"id": 1, 'username': "username_1", "email": "example_1@example.com", 'password': "qwerty"}
 user_2 = {"id": 2, 'username': "username_2", "email": "example_2@example.com", 'password': "qwerty"}
@@ -188,7 +178,6 @@ customer_3 = {'id': 3, 'phone_number': '+380441312233', 'user_id': 3}
 customer_4 = {'id': 4, 'phone_number': '+380441412233', 'user_id': 4}
 customer_5 = {'id': 5, 'phone_number': '+380441512233', 'user_id': 5}
 customer_6 = {'id': 6, 'phone_number': '+380441612233', 'user_id': 6}
-
 
 
 class EnyDataTesting(TestCase):
@@ -276,10 +265,6 @@ class EnyDataTesting(TestCase):
         self.assertEqual(customer_obj_5.user.id, user_5["id"])
         customer_obj_6 = Customer.objects.get(id=6)
         self.assertEqual(customer_obj_6.user.id, user_6["id"])
-
-
-
-
 
 # class RequestProductsTesting(EnyDataTesting):
 #     def test_get_products(self):

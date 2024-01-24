@@ -1,5 +1,6 @@
 from ..models import Product, Category, Type, Image, Comments, Rating, Customer, ShopContacts, ShopAddress, \
     UserBucketProducts, Order
+from django.contrib.auth.models import User
 from django.test import TestCase
 from .tests_data_insert import client, EnyDataTesting
 from .tests_data_insert import category_1, category_2, type_1, type_2, type_3, type_4
@@ -33,11 +34,13 @@ class RequestProductsTesting(EnyDataTesting):
         self.assertEqual(out_of_stock[1].title, 'Soap 5')
 
     def test_get_products_type(self):
+        client.force_login(User.objects.get(id=1))
         response = client.get("",
                               data={'type': '3', 'sorting': 'rating'})
         products = response.context["products"]
         out_of_stock = response.context["out_of_stock"]
         self.assertEqual(products[0].title, 'Soap 1')
+        client.logout()
         self.assertEqual(products[1].title, 'Soap 2')
         self.assertEqual(out_of_stock[0].title, 'Soap 4')
         self.assertEqual(out_of_stock[1].title, 'Soap 5')
